@@ -207,19 +207,7 @@ impl GPIO {
     }
 
     fn set_bits(self: &mut GPIO, row: u32, lineVec: Vec<Pixel>) {
-        self.configure_output_pin(PIN_OE);
-        self.configure_output_pin(PIN_C);
-        self.configure_output_pin(PIN_R1);
-        self.configure_output_pin(PIN_R2);
-        self.configure_output_pin(PIN_B1);
-        self.configure_output_pin(PIN_B2);
-        self.configure_output_pin(PIN_G1);
 
-
-        self.configure_output_pin(PIN_LAT);
-        self.configure_output_pin(PIN_LAT);
-        self.configure_output_pin(PIN_CLK);
-        self.configure_output_pin(PIN_CLK);
         println!("abc");
         unsafe {
             println!("{},{:?},", *self.gpio_set_bits_, self.gpio_set_bits_);
@@ -470,6 +458,19 @@ pub fn main() {
     }).unwrap();
     GPIO.set_bits(0, Vec::new());
     while interrupt_received.load(Ordering::SeqCst) == false {
+        GPIO.configure_output_pin(PIN_OE);
+        GPIO.configure_output_pin(PIN_C);
+        GPIO.configure_output_pin(PIN_R1);
+        GPIO.configure_output_pin(PIN_R2);
+        GPIO.configure_output_pin(PIN_B1);
+        GPIO.configure_output_pin(PIN_B2);
+        GPIO.configure_output_pin(PIN_G1);
+
+
+        GPIO.configure_output_pin(PIN_LAT);
+        GPIO.configure_output_pin(PIN_LAT);
+        GPIO.configure_output_pin(PIN_CLK);
+        GPIO.configure_output_pin(PIN_CLK);
         // TODO: Implement your rendering loop here
     }
     println!("Exiting.");
