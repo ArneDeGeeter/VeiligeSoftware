@@ -248,6 +248,7 @@ impl GPIO {
             Some(m) => {
                 unsafe {
                     io.gpio_port_ = m.data() as *mut u32;
+                    println!("{}",*io.gpio_port_);
                     io.gpio_set_bits_ = (io.gpio_port_ as usize + 0x1C) as *mut u32;
                     io.gpio_clr_bits_ = (io.gpio_port_ as usize + 0x28) as *mut u32;
                     io.gpio_read_bits_ = (io.gpio_port_ as usize + 0x34) as *mut u32;
