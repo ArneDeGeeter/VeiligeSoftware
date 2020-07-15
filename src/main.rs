@@ -331,8 +331,8 @@ fn decode_ppm_image(cursor: &mut Cursor<Vec<u8>>) -> Result<Image, std::io::Erro
     assert_eq!(array[0], "P6");
     assert_eq!(array[3], "255");
 
-    image.width = array[1].parse::<u32>().unwrap();
-    image.height = array[2].parse::<u32>().unwrap();
+    image.width = array[1].parse::<u32>().unwrap() as usize;
+    image.height = array[2].parse::<u32>().unwrap() as usize;
     image.pixels = vec![vec![Pixel { r: 0, g: 0, b: 0 }; image.width as usize]; image.height as usize];
     let mut count = 0;
     let mut pixelcounter = 0;
@@ -363,9 +363,9 @@ fn decode_ppm_image(cursor: &mut Cursor<Vec<u8>>) -> Result<Image, std::io::Erro
                     pixelcounter = (pixelcounter + 1) % 3;
                     if pixelcounter == 0 {
                         image.pixels[((image.height * image.width - 1 - count) / image.width) as usize][((image.height * image.width - 1 - count) % image.width) as usize] = Pixel {
-                            r: pixel_array[0],
-                            g: pixel_array[1],
-                            b: pixel_array[2],
+                            r: pixel_array[0] as u16,
+                            g: pixel_array[1] as u16,
+                            b: pixel_array[2] as u16,
                         };
 
                         count += 1;
