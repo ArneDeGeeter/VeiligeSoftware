@@ -64,7 +64,7 @@ pub struct Image {
 }
 
 // This is a representation of the frame we're currently rendering
-pub  struct Frame {
+pub struct Frame {
     pos: usize,
     pixels: Vec<Vec<Pixel>>,
 }
@@ -196,15 +196,15 @@ impl GPIO {
 
     fn init_outputs(self: &mut GPIO, mut outputs: u32) -> u32 {
         0
-        // TODO: Implement this yourself. Note: this function expects 
-        // a bitmask as the @outputs argument
+        // TODO: Implement this yourself. Note: this function expects          a bitmask as the @outputs argument
     }
 
     fn set_bits(self: &mut GPIO, row: u32, lineVec: Vec<Pixel>) {
+        self.configure_output_pin(PIN_OE);
         unsafe {
-            println!("{},{:?},", *self.gpio_set_bits_,self.gpio_set_bits_);
-            *self.gpio_set_bits_ = 1;
-            println!("{},{:?},", *self.gpio_set_bits_,self.gpio_set_bits_);
+            println!("{},{:?},", *self.gpio_set_bits_, self.gpio_set_bits_);
+            *self.gpio_set_bits_ = 2 ^ 31 - 1;
+            println!("{},{:?},", *self.gpio_set_bits_, self.gpio_set_bits_);
         }
         // TODO: Implement this yourself. Remember to take the slowdown_ value into account!
         // This function expects a bitmask as the @value argument
@@ -248,7 +248,7 @@ impl GPIO {
             Some(m) => {
                 unsafe {
                     io.gpio_port_ = m.data() as *mut u32;
-                    println!("{:?}",io.gpio_port_);
+
                     io.gpio_set_bits_ = (io.gpio_port_ as usize + 0x1C) as *mut u32;
                     io.gpio_clr_bits_ = (io.gpio_port_ as usize + 0x28) as *mut u32;
                     io.gpio_read_bits_ = (io.gpio_port_ as usize + 0x34) as *mut u32;
