@@ -27,6 +27,8 @@ use std::time::Duration;
 use shuteye::sleep;
 use mmap::{MemoryMap, MapOption};
 use std::io::Cursor;
+use std::sync::mpsc::RecvTimeoutError::Timeout;
+use std::ptr::null;
 
 #[derive(Copy, Clone)]
 struct Pixel {
@@ -197,7 +199,12 @@ impl GPIO {
         // a bitmask as the @outputs argument
     }
 
-    fn set_bits(self: &mut GPIO, value: u32) {
+    fn set_bits(self: &mut GPIO, row: u32, lineVec: Vec<Pixel>) {
+        unsafe {
+            print!(*self.gpio_set_bits_);
+            *self.gpio_set_bits_ = 1;
+            print!(*self.gpio_set_bits_);
+        }
         // TODO: Implement this yourself. Remember to take the slowdown_ value into account!
         // This function expects a bitmask as the @value argument
     }
@@ -240,6 +247,10 @@ impl GPIO {
             Some(m) => {
                 unsafe {
                     io.gpio_port_ = m.data() as *mut u32;
+                    io.gpio_set_bits_ = (m.data() + 0x1C) as *mut u32;
+                    io.gpio_clr_bits_ = (m.data() + 0x28) as *mut u32;
+                    io.gpio_read_bits_ = (m.data() + 0x34) as *mut u32;
+
                     // TODO: Calculate the correct values of the other raw pointers here.
                     // You should use the offset() method on the gpio_port_ pointer.
                     // Keep in mind that Rust raw pointer arithmetic works exactly like
@@ -265,14 +276,13 @@ impl GPIO {
 impl Timer {
     // Reads from the 1Mhz timer register (see Section 2.5 in the assignment)
     unsafe fn read(self: &Timer) -> u32 {
-        0
-        // TODO: Implement this yourself.
+        *self.timereg
     }
 
     fn new() -> Timer {
-        let mut var2=(BCM2709_PERI_BASE+TIMER_REGISTER_OFFSET+0x4) as *mut u32;
-        Timer { _timemap: None, timereg: var2 }
-        // TODO: Implement this yourself.
+        let mut var = (BCM2709_PERI_BASE + TIMER_REGISTER_OFFSET + 0x4) as *mut u32;
+        Timer { _timemap: mmap_bcm_register((GPIO_REGISTER_OFFSET + TIMER_REGISTER_OFFSET) as usize), timereg: var }
+        // TODO: timemap?.
     }
 
     // High-precision sleep function (see section 2.5 in the assignment)
@@ -281,7 +291,7 @@ impl Timer {
     // about how you can approximate the desired precision. Obviously, there is
     // no perfect solution here.
     fn nanosleep(self: &Timer, mut nanos: u32) {
-        // TODO: Implement this yourself.
+        libc::clock_nanosleep(nanos);
     }
 }
 
@@ -376,17 +386,16 @@ fn decode_ppm_image(cursor: &mut Cursor<Vec<u8>>) -> Result<Image, std::io::Erro
             }
         }
     }
-    // TODO: Parse the image here
 
     Ok(image)
 }
 
-pub fn read_ppm(){
+pub fn read_ppm() -> Result<Image, std::io::Error> {
     let args: Vec<String> = std::env::args().collect();
 
     if args.len() < 2 {
         eprintln!("Syntax: {} <filename>", args[0]);
-        return;
+        Err("Expects args");
     }
 
     let path = Path::new(&args[1]);
@@ -408,8 +417,7 @@ pub fn read_ppm(){
         Ok(img) => img,
         Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
     };
-
-
+    Ok(image)
 }
 
 impl Image {}
@@ -428,7 +436,13 @@ pub fn main() {
     }
 
     // TODO: Read the PPM file here. You can find its name in args[1]
-    // TODO: Initialize the GPIO struct and the Timer struct
+    image = match read_ppm() {
+        Ok(img) => img,
+        Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
+    };
+
+    let GPIO = GPIO::new(500);
+    let timer = Timer::new();
 
     // This code sets up a CTRL-C handler that writes "true" to the 
     // interrupt_received bool.
@@ -436,7 +450,7 @@ pub fn main() {
     ctrlc::set_handler(move || {
         int_recv.store(true, Ordering::SeqCst);
     }).unwrap();
-
+    GPIO.set_bits(0, Vec::new());
     while interrupt_received.load(Ordering::SeqCst) == false {
         // TODO: Implement your rendering loop here
     }
