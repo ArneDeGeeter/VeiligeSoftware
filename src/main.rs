@@ -269,7 +269,7 @@ impl Timer {
     }
 
     fn new() -> Timer {
-        let var=0 as u32;
+        let mut var=0 as u32;
         Timer { _timemap: None, timereg: *var }
         // TODO: Implement this yourself.
     }
