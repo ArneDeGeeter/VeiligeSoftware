@@ -32,13 +32,13 @@ use std::ptr::null;
 use time::Timespec;
 
 #[derive(Copy, Clone)]
-struct Pixel {
+pub struct Pixel {
     r: u16,
     g: u16,
     b: u16,
 }
 
-struct GPIO {
+pub struct GPIO {
     gpio_map_: Option<MemoryMap>,
     output_bits_: u32,
     input_bits_: u32,
@@ -57,14 +57,14 @@ struct GPIO {
 }
 
 // This is a representation of the "raw" image
-struct Image {
+pub struct Image {
     width: usize,
     height: usize,
     pixels: Vec<Vec<Pixel>>,
 }
 
 // This is a representation of the frame we're currently rendering
-struct Frame {
+pub  struct Frame {
     pos: usize,
     pixels: Vec<Vec<Pixel>>,
 }
