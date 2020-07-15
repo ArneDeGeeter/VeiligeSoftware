@@ -292,7 +292,7 @@ impl Timer {
     // about how you can approximate the desired precision. Obviously, there is
     // no perfect solution here.
     fn nanosleep(self: &Timer, mut nanos: u32) {
-        libc::nanosleep(Timespec::new(0, nanos as i32))
+        libc::nanosleep(Timespec::new(0, nanos as i32),Timespec::new(0, nanos as i32));
     }
 }
 
