@@ -297,6 +297,90 @@ impl Frame {}
 // You may assume that the max_color value is always 255, but you should add sanity checks
 // to safely reject files with other max_color values
 
+fn decode_ppm_image(cursor: &mut Cursor<Vec<u8>>) -> Result<Image, std::io::Error> {
+    let mut image = Image {
+        width: 0,
+        height: 0,
+        pixels: vec![],
+    };
+
+    let mut c: [u8; 1] = [0; 1];
+    let mut array: [String; 4] = Default::default();
+
+    let mut count = 0;
+    let mut comment = false;
+
+    loop {
+        cursor.read(&mut c)?;
+        match &c {
+            b"\n" => {
+                comment = false;
+                break;
+            }
+            b"#" => comment = true,
+            b" " => if !comment { count += 1 },
+            _ => {
+                if !comment {
+                    array[count].push(char::from(c[0]));
+                    continue;
+                }
+            }
+        }
+    }
+    println!("{:?}", array);
+    assert_eq!(array[0], "P6");
+    assert_eq!(array[3], "255");
+
+    image.width = array[1].parse::<u32>().unwrap();
+    image.height = array[2].parse::<u32>().unwrap();
+    image.pixels = vec![vec![Pixel { r: 0, g: 0, b: 0 }; image.width as usize]; image.height as usize];
+    let mut count = 0;
+    let mut pixelcounter = 0;
+    let mut pixel_array: [u8; 3] = Default::default();
+    comment = false;
+
+    /*   for _ in 0..image.height {
+           let mut row = Vec::new();
+           for _ in 0..image.width {
+               row.push(Pixel { r: cursor.read_u8()?, g: cursor.read_u8()?, b: cursor.read_u8()? })
+           }
+           image.pixels.push(row);
+       }*/
+    loop {
+        cursor.read(&mut c)?;
+        match &c {
+            b"\n" => {
+                comment = false;
+            }
+
+            b"#" => {
+                comment = true;
+                continue;
+            }
+            _ => {
+                if !comment {
+                    pixel_array[pixelcounter] = c[0];
+                    pixelcounter = (pixelcounter + 1) % 3;
+                    if pixelcounter == 0 {
+                        image.pixels[((image.height * image.width - 1 - count) / image.width) as usize][((image.height * image.width - 1 - count) % image.width) as usize] = Pixel {
+                            r: pixel_array[0],
+                            g: pixel_array[1],
+                            b: pixel_array[2],
+                        };
+
+                        count += 1;
+                        if count == image.height * image.width { break; }
+                    }
+                }
+                continue;
+            }
+        }
+    }
+    // TODO: Parse the image here
+
+    Ok(image)
+}
+
 pub fn read_ppm(){
     let args: Vec<String> = std::env::args().collect();
 
