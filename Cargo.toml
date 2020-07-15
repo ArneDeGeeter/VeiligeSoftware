@@ -1,0 +1,13 @@
+[package]
+name = "rust_project"
+version = "0.1.0"
+authors = ["stijn-volckaert"]
+
+[dependencies]
+libc="0.2"
+time="0.1"
+ctrlc="3.1.1"
+simple-error="0.1.13"
+shuteye="0.3.3"
+mmap="0.1.1"
+nix="0.13.0"
