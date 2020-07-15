@@ -29,6 +29,7 @@ use mmap::{MemoryMap, MapOption};
 use std::io::Cursor;
 use std::sync::mpsc::RecvTimeoutError::Timeout;
 use std::ptr::null;
+use time::Timespec;
 
 #[derive(Copy, Clone)]
 struct Pixel {
@@ -201,9 +202,9 @@ impl GPIO {
 
     fn set_bits(self: &mut GPIO, row: u32, lineVec: Vec<Pixel>) {
         unsafe {
-            print!(*self.gpio_set_bits_);
+            print!("{}", *self.gpio_set_bits_);
             *self.gpio_set_bits_ = 1;
-            print!(*self.gpio_set_bits_);
+            print!("{}", *self.gpio_set_bits_);
         }
         // TODO: Implement this yourself. Remember to take the slowdown_ value into account!
         // This function expects a bitmask as the @value argument
@@ -291,7 +292,7 @@ impl Timer {
     // about how you can approximate the desired precision. Obviously, there is
     // no perfect solution here.
     fn nanosleep(self: &Timer, mut nanos: u32) {
-        libc::clock_nanosleep(nanos);
+        nanosleep(Timespec::new(0, nanos as i32))
     }
 }
 
