@@ -189,6 +189,9 @@ impl GPIO {
         println!("{},{}", current_val, pin_num);
         // the bit range within the register is [(pin_num % 10) * 3 .. (pin_num % 10) * 3 + 2]
         // we need to set these bits to 001
+        println!("{}",!(7 << ((pin_num % 10) * 3)));
+        println!("{}",(1 << ((pin_num % 10) * 3));
+        println!("{}",!(7 << ((pin_num % 10) * 3))) | (1 << ((pin_num % 10) * 3));
         let new_val = (current_val & !(7 << ((pin_num % 10) * 3))) | (1 << ((pin_num % 10) * 3));
         println!("{},{}", new_val, pin_num);
 
