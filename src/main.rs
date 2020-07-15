@@ -186,12 +186,13 @@ impl GPIO {
         // NOTE/WARNING: When reading from or writing to MMIO memory regions, you MUST 
         // use the std::ptr::read_volatile and std::ptr::write_volatile functions
         let current_val = unsafe { std::ptr::read_volatile(register_ref) };
-        println!("{},{}", current_val, pin_num);
+        println!("{:#034b},{}", current_val, pin_num);
         // the bit range within the register is [(pin_num % 10) * 3 .. (pin_num % 10) * 3 + 2]
         // we need to set these bits to 001
-        println!("{}",!(7 << ((pin_num % 10) * 3)));
-        println!("{}",(1 << ((pin_num % 10) * 3)));
-        println!("{}",!((current_val & !(7 << ((pin_num % 10) * 3)) as u32) | (1 << ((pin_num % 10) * 3)) as u32));
+        println!("{:#034b}",!(7 << ((pin_num % 10) * 3)));
+        println!("{:#034b}",(1 << ((pin_num % 10) * 3)));
+        println!("{:#034b}",((current_val & !(7 << ((pin_num % 10) * 3)) as u32)));
+        println!("{:#034b}",((current_val & !(7 << ((pin_num % 10) * 3)) as u32) | (1 << ((pin_num % 10) * 3)) as u32));
         let new_val = (current_val & !(7 << ((pin_num % 10) * 3))) | (1 << ((pin_num % 10) * 3));
         println!("{},{}", new_val, pin_num);
 
