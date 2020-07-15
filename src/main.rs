@@ -292,7 +292,7 @@ impl Timer {
     // about how you can approximate the desired precision. Obviously, there is
     // no perfect solution here.
     fn nanosleep(self: &Timer, mut nanos: u32) {
-        nanosleep(Timespec::new(0, nanos as i32))
+        libc::nanosleep(Timespec::new(0, nanos as i32))
     }
 }
 
@@ -394,10 +394,6 @@ fn decode_ppm_image(cursor: &mut Cursor<Vec<u8>>) -> Result<Image, std::io::Erro
 pub fn read_ppm() -> Result<Image, std::io::Error> {
     let args: Vec<String> = std::env::args().collect();
 
-    if args.len() < 2 {
-        eprintln!("Syntax: {} <filename>", args[0]);
-        Err("Expects args");
-    }
 
     let path = Path::new(&args[1]);
     let display = path.display();
@@ -437,7 +433,7 @@ pub fn main() {
     }
 
     // TODO: Read the PPM file here. You can find its name in args[1]
-    image = match read_ppm() {
+    let image = match read_ppm() {
         Ok(img) => img,
         Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
     };
