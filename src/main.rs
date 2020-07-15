@@ -247,9 +247,9 @@ impl GPIO {
             Some(m) => {
                 unsafe {
                     io.gpio_port_ = m.data() as *mut u32;
-                    io.gpio_set_bits_ = (&io.gpio_port_ + 0x1C ) as *mut u32;
-                    io.gpio_clr_bits_ = (&io.gpio_port_ + 0x28 ) as *mut u32;
-                    io.gpio_read_bits_ = (&io.gpio_port_ + 0x34 ) as *mut u32;
+                    io.gpio_set_bits_ = (io.gpio_port_ as usize + 0x1C) as *mut u32;
+                    io.gpio_clr_bits_ = (io.gpio_port_ as usize + 0x28) as *mut u32;
+                    io.gpio_read_bits_ = (io.gpio_port_ as usize + 0x34) as *mut u32;
 
                     // TODO: Calculate the correct values of the other raw pointers here.
                     // You should use the offset() method on the gpio_port_ pointer.
