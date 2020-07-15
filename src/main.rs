@@ -202,9 +202,9 @@ impl GPIO {
 
     fn set_bits(self: &mut GPIO, row: u32, lineVec: Vec<Pixel>) {
         unsafe {
-            println!("{},{:p},", *self.gpio_set_bits_,*self.gpio_set_bits_);
+            println!("{},{:?},", *self.gpio_set_bits_,self.gpio_set_bits_);
             *self.gpio_set_bits_ = 1;
-            println!("{},{:p},", *self.gpio_set_bits_,*self.gpio_set_bits_);
+            println!("{},{:?},", *self.gpio_set_bits_,self.gpio_set_bits_);
         }
         // TODO: Implement this yourself. Remember to take the slowdown_ value into account!
         // This function expects a bitmask as the @value argument
