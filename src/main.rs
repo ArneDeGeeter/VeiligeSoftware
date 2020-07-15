@@ -292,7 +292,7 @@ impl Timer {
     // about how you can approximate the desired precision. Obviously, there is
     // no perfect solution here.
     fn nanosleep(self: &Timer, mut nanos: u32) {
-
+//todo sleep
         // libc::nanosleep(&Timespec::new(0, nanos as i32),&Timespec::new(0, nanos as i32));
     }
 }
@@ -439,8 +439,8 @@ pub fn main() {
         Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
     };
 
-    let GPIO = GPIO::new(500);
-    let timer = Timer::new();
+    let mut GPIO = GPIO::new(500);
+    let mut timer = Timer::new();
 
     // This code sets up a CTRL-C handler that writes "true" to the 
     // interrupt_received bool.
