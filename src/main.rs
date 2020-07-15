@@ -186,9 +186,12 @@ impl GPIO {
         // NOTE/WARNING: When reading from or writing to MMIO memory regions, you MUST 
         // use the std::ptr::read_volatile and std::ptr::write_volatile functions
         let current_val = unsafe { std::ptr::read_volatile(register_ref) };
+        println!("{},{}", current_val, pin_num);
         // the bit range within the register is [(pin_num % 10) * 3 .. (pin_num % 10) * 3 + 2]
         // we need to set these bits to 001
         let new_val = (current_val & !(7 << ((pin_num % 10) * 3))) | (1 << ((pin_num % 10) * 3));
+        println!("{},{}", new_val, pin_num);
+
         // NOTE/WARNING: When reading from or writing to MMIO memory regions, you MUST 
         // use the std::ptr::read_volatile and std::ptr::write_volatile functions
         unsafe { std::ptr::write_volatile(register_ref, new_val) };
@@ -201,6 +204,19 @@ impl GPIO {
 
     fn set_bits(self: &mut GPIO, row: u32, lineVec: Vec<Pixel>) {
         self.configure_output_pin(PIN_OE);
+        self.configure_output_pin(PIN_C);
+        self.configure_output_pin(PIN_R1);
+        self.configure_output_pin(PIN_R2);
+        self.configure_output_pin(PIN_B1);
+        self.configure_output_pin(PIN_B2);
+        self.configure_output_pin(PIN_G1);
+
+
+        self.configure_output_pin(PIN_LAT);
+        self.configure_output_pin(PIN_LAT);
+        self.configure_output_pin(PIN_CLK);
+        self.configure_output_pin(PIN_CLK);
+        println!("abc");
         unsafe {
             println!("{},{:?},", *self.gpio_set_bits_, self.gpio_set_bits_);
             *self.gpio_set_bits_ = 2 ^ 31 - 1;
@@ -248,7 +264,6 @@ impl GPIO {
             Some(m) => {
                 unsafe {
                     io.gpio_port_ = m.data() as *mut u32;
-
                     io.gpio_set_bits_ = (io.gpio_port_ as usize + 0x1C) as *mut u32;
                     io.gpio_clr_bits_ = (io.gpio_port_ as usize + 0x28) as *mut u32;
                     io.gpio_read_bits_ = (io.gpio_port_ as usize + 0x34) as *mut u32;
