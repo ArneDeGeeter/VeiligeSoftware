@@ -270,8 +270,9 @@ impl Timer {
     }
 
     fn new() -> Timer {
-        let var=0 as u32;
-        Timer { _timemap: None, timereg: *var }
+        let mut var=(BCM2709_PERI_BASE+TIMER_REGISTER_OFFSET) as *u32;
+        let mut var2=var+4 as *u32;
+        Timer { _timemap: None, timereg: var2 }
         // TODO: Implement this yourself.
     }
 
