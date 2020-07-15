@@ -191,7 +191,7 @@ impl GPIO {
         // we need to set these bits to 001
         println!("{}",!(7 << ((pin_num % 10) * 3)));
         println!("{}",(1 << ((pin_num % 10) * 3)));
-        println!("{}",!(7 << (current_val & !(7 << ((pin_num % 10) * 3))) | (1 << ((pin_num % 10) * 3))));
+        println!("{}",!(7 << (current_val & !(7 << ((pin_num % 10) * 3)) as u32) | (1 << ((pin_num % 10) * 3)) as u32));
         let new_val = (current_val & !(7 << ((pin_num % 10) * 3))) | (1 << ((pin_num % 10) * 3));
         println!("{},{}", new_val, pin_num);
 
