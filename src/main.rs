@@ -26,6 +26,7 @@ use std::fs::File;
 use std::time::Duration;
 use shuteye::sleep;
 use mmap::{MemoryMap, MapOption};
+use std::io::Cursor;
 
 #[derive(Copy, Clone)]
 struct Pixel {
@@ -295,6 +296,38 @@ impl Frame {}
 // You do not need to add support for any formats other than P6
 // You may assume that the max_color value is always 255, but you should add sanity checks
 // to safely reject files with other max_color values
+
+pub fn read_ppm(){
+    let args: Vec<String> = std::env::args().collect();
+
+    if args.len() < 2 {
+        eprintln!("Syntax: {} <filename>", args[0]);
+        return;
+    }
+
+    let path = Path::new(&args[1]);
+    let display = path.display();
+
+    let mut file = match File::open(&path) {
+        Err(why) => panic!("Could not open file: {} (Reason: {})",
+                           display, why),
+        Ok(file) => file
+    };
+
+    // read the full file into memory. panic on failure
+    let mut raw_file = Vec::new();
+    file.read_to_end(&mut raw_file).unwrap();
+
+    // construct a cursor so we can seek in the raw buffer
+    let mut cursor = Cursor::new(raw_file);
+    let image = match decode_ppm_image(&mut cursor) {
+        Ok(img) => img,
+        Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
+    };
+
+
+}
+
 impl Image {}
 
 pub fn main() {
