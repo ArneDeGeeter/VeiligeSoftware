@@ -252,7 +252,7 @@ impl GPIO {
             }
 
             self.activatePins(&mut (GPIO_BIT!(PIN_CLK) as u32));
-            // self.clearPins(&mut (GPIO_BIT!(PIN_CLK) as u32));
+            self.clearPins(&mut (GPIO_BIT!(PIN_CLK) as u32));
         }
 
 
