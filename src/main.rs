@@ -226,7 +226,7 @@ impl GPIO {
         unsafe { *pinOutputSet = *pinOutputSet | *bitmask }
         println!("{:#034b}", unsafe { *pinOutputSet });
         println!("{:#034b}", unsafe { *pinOutputClear });
-        println!("{:#034b},adr",self.gpio_read_bits_);
+        println!("{},adr",self.gpio_read_bits_);
         println!("{:#034b}", unsafe { *self.gpio_read_bits_ });
 
 
