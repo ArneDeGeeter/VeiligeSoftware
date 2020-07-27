@@ -263,7 +263,7 @@ impl GPIO {
         println!("{:#034b},read oe1", unsafe { *self.gpio_read_bits_ });
 
         self.activatePins((&mut ((GPIO_BIT!(PIN_B)) as u32)));
-        // thread::sleep(Duration::new(0, 1000000*50));
+        thread::sleep(Duration::new(0, 1000000*500));
 
         println!("{:#034b},read oe2", unsafe { *self.gpio_read_bits_ });
 
