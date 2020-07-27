@@ -208,8 +208,8 @@ impl GPIO {
     }
     fn activatePins(self: &mut GPIO, bitmask: &mut u32) {
         let mut pinOutputSet = self.gpio_set_bits_;
-
-        unsafe { *pinOutputSet = *pinOutputSet & 0b00000001111000100000000001110000; }
+        println!("{:#034b}", *bitmask);
+        unsafe { *pinOutputSet = *pinOutputSet & *bitmask; }
     }
     fn clearPins(self: &mut GPIO, bitmask: &mut u32) {
         let mut pinOutputClear = self.gpio_clr_bits_;
@@ -236,7 +236,6 @@ impl GPIO {
     }
 
     fn set_bits(self: &mut GPIO, row: u32, lineVec: Vec<Pixel>) {
-
         self.clearAllPins();
         println!("{:#034b},read 2", unsafe { *self.gpio_read_bits_ });
 
@@ -250,10 +249,8 @@ impl GPIO {
             self.activatePins(&mut (GPIO_BIT!(PIN_CLK) as u32));
         }
 
-        println!("{:#034b},read clear", unsafe { *self.gpio_read_bits_ });
 
         self.clearPins(&mut ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_R2) | GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2) | GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2) | GPIO_BIT!(PIN_CLK)) as u32));
-        println!("{:#034b},read clear", unsafe { *self.gpio_read_bits_ });
 
         self.clearAllPinsAndActivate((&mut ((GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C)) as u32)));
         self.activatePins(&mut (GPIO_BIT!(PIN_LAT) as u32));
@@ -264,10 +261,10 @@ impl GPIO {
 
         println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
-        println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
-        thread::sleep(Duration::new(0,  150));
-        self.activatePins(&mut (GPIO_BIT!(PIN_OE) as u32));
-        println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
+        // println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
+        thread::sleep(Duration::new(0, 150));
+    //    self.activatePins(&mut (GPIO_BIT!(PIN_OE) as u32));
+    //     println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
 
         /*self.configure_output_pin(PIN_OE);
         self.configure_output_pin(PIN_C);
