@@ -224,10 +224,9 @@ impl GPIO {
         let mut pinOutputSet = self.gpio_set_bits_;
         // println!("{:#034b},and", unsafe { *pinOutputSet | *bitmask });
         unsafe { *pinOutputSet = *pinOutputSet | *bitmask }
-        // println!("{:#034b}", unsafe { *pinOutputSet });
-        // println!("{:#034b}", unsafe { *pinOutputClear });
+        println!("{:#034b}", unsafe { *pinOutputSet });
+        println!("{:#034b}", unsafe { *pinOutputClear });
         // println!("{:?},adr",self.gpio_read_bits_);
-        println!("{:#034b}", unsafe { *self.gpio_read_bits_ });
 
 
     }
@@ -256,8 +255,11 @@ impl GPIO {
         self.clearAllPinsAndActivate((&mut ((GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C)) as u32)));
         thread::sleep(Duration::new(0, 100000 * 1));
         self.activatePins(&mut (GPIO_BIT!(PIN_LAT) as u32));
+        println!("{:#034b}", unsafe { *self.gpio_read_bits_ });
         thread::sleep(Duration::new(0, 100000 * 1));
         self.clearPins(&mut (GPIO_BIT!(PIN_LAT) as u32));
+        println!("{:#034b}", unsafe { *self.gpio_read_bits_ });
+
 
         thread::sleep(Duration::new(0, 1000000 * 300));
 
