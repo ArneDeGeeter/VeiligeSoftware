@@ -205,20 +205,20 @@ impl GPIO {
         0
         // TODO: Implement this yourself. Note: this function expects          a bitmask as the @outputs argument
     }
-    fn activatePins(self: &mut GPIO, bitmask: u32) {
-        let mut pinOutputSet = (GPIO_REGISTER_OFFSET + 0x1C) as *u32;
+    fn activatePins(self: &mut GPIO, bitmask: &mut u32) {
+        let mut pinOutputSet = (GPIO_REGISTER_OFFSET + 0x1C) as * mut u32;
         pinOutputSet = pinOutputSet | bitmask;
         unsafe {}
     }
-    fn clearPins(self: &mut GPIO, bitmask: u32) {
-        let mut pinOutputClear = (GPIO_REGISTER_OFFSET + 0x28) as *u32;
+    fn clearPins(self: &mut GPIO, bitmask: &mut u32) {
+        let mut pinOutputClear = (GPIO_REGISTER_OFFSET + 0x28) as * mut u32;
         pinOutputClear = pinOutputClear | bitmask;
     }
-    fn clearAllPinsAndActivate(self: &mut GPIO, bitmask: u32) {
-        let mut pinOutputClear = (GPIO_REGISTER_OFFSET + 0x28) as *u32;
+    fn clearAllPinsAndActivate(self: &mut GPIO, bitmask: &mut u32) {
+        let mut pinOutputClear = (GPIO_REGISTER_OFFSET + 0x28) as * mut u32;
         pinOutputClear = 0;
 
-        let mut pinOutputSet = (GPIO_REGISTER_OFFSET + 0x1C) as *u32;
+        let mut pinOutputSet = (GPIO_REGISTER_OFFSET + 0x1C) as * mut u32;
         pinOutputSet = pinOutputSet & bitmask;
     }
 
