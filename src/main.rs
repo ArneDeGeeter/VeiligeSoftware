@@ -202,6 +202,7 @@ impl GPIO {
     }
 
     fn init_outputs(self: &mut GPIO, mut outputs: u32) -> u32 {
+        self.configure_output_pin(PIN_OE);
         0
         // TODO: Implement this yourself. Note: this function expects          a bitmask as the @outputs argument
     }
@@ -214,6 +215,11 @@ impl GPIO {
         let mut pinOutputClear = self.gpio_clr_bits_;
 
         unsafe { *pinOutputClear = *pinOutputClear & *bitmask; }
+    }
+    fn clearAllPins(self: &mut GPIO) {
+        let mut pinOutputClear = self.gpio_clr_bits_;
+
+        unsafe { *pinOutputClear = 0b11111111111111111111111111111111; }
     }
     fn clearAllPinsAndActivate(self: &mut GPIO, bitmask: &mut u32) {
         //  println!("{:#034b}", bitmask);
@@ -233,6 +239,8 @@ impl GPIO {
         println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
         println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
+        self.clearAllPins();
+        println!("{:#034b},read 2", unsafe { *self.gpio_read_bits_ });
 
         thread::sleep(Duration::new(0, 1000000 * 300));
 
@@ -543,6 +551,7 @@ pub fn main() {
     ctrlc::set_handler(move || {
         int_recv.store(true, Ordering::SeqCst);
     }).unwrap();
+    GPIO.init_outputs(0);
     while interrupt_received.load(Ordering::SeqCst) == false {
         GPIO.set_bits(0, Vec::new());
 
