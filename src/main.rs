@@ -226,7 +226,7 @@ impl GPIO {
 
     fn set_bits(self: &mut GPIO, row: u32, lineVec: Vec<Pixel>) {
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
-        thread::sleep(Duration::new(0, 1000000 * 300));
+        thread::sleep(Duration::new(0, 1000000 * 3000));
 
         // thread::sleep(time::Duration::from_millis(10));
         self.activatePins(&mut (GPIO_BIT!(PIN_OE) as u32));
@@ -237,6 +237,7 @@ impl GPIO {
                 self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2)) as u32));
             }
             self.activatePins(&mut (GPIO_BIT!(PIN_CLK) as u32));
+            self.clearPins(&mut (GPIO_BIT!(PIN_CLK) as u32));
         }
 
         self.clearPins(&mut ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_R2) | GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2) | GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2) | GPIO_BIT!(PIN_CLK)) as u32));
@@ -245,7 +246,7 @@ impl GPIO {
         self.clearPins(&mut (GPIO_BIT!(PIN_LAT) as u32));
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
 
-        thread::sleep(Duration::new(0, 1000000 * 300));
+        thread::sleep(Duration::new(0, 1000000 * 3000));
         self.activatePins(&mut (GPIO_BIT!(PIN_OE) as u32));
 
 
