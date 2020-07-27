@@ -225,7 +225,7 @@ impl GPIO {
         //  println!("{:#034b}", bitmask);
 
         let mut pinOutputClear = self.gpio_clr_bits_;
-        unsafe { *pinOutputClear = 0; }
+        unsafe { *pinOutputClear = 0b11111111111111111111111111111111; }
 
         let mut pinOutputSet = self.gpio_set_bits_;
         // println!("{:#034b},and", unsafe { *pinOutputSet | *bitmask });
