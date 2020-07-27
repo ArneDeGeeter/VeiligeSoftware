@@ -288,7 +288,7 @@ impl GPIO {
     fn new(slowdown: u32) -> GPIO {
 
         // Map the GPIO register file. See section 2.1 in the assignment for details
-        let map = mmap_bcm_register(GPIO_REGISTER_OFFSET as usize);
+        let map = mmap_bcm_register((BCM2709_PERI_BASE+GPIO_REGISTER_OFFSET) as usize);
 
         // Initialize the GPIO struct with default values
         let mut io: GPIO = GPIO {
