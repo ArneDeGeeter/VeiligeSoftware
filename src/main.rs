@@ -321,6 +321,10 @@ impl GPIO {
                     io.gpio_set_bits_ = (io.gpio_port_ as usize + 0x1C) as *mut u32;
                     io.gpio_clr_bits_ = (io.gpio_port_ as usize + 0x28) as *mut u32;
                     io.gpio_read_bits_ = (io.gpio_port_ as usize + 0x34) as *mut u32;
+                    println!("{:?}",io.gpio_port_);
+                    println!("{:?}",io.gpio_set_bits_);
+                    println!("{:?}",io.gpio_clr_bits_);
+                    println!("{:?}",io.gpio_read_bits_);
 
                     // TODO: Calculate the correct values of the other raw pointers here.
                     // You should use the offset() method on the gpio_port_ pointer.
