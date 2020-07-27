@@ -223,22 +223,25 @@ impl GPIO {
     }
 
     fn set_bits(self: &mut GPIO, row: u32, lineVec: Vec<Pixel>) {
-        self.clearPins(GPIO_BIT!(PIN_OE) as u32);
+        self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
         for c in 0..15 {
             if (c % 2 == 1) {
-                self.clearAllPinsAndActivate((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_G2)) as u32);
+                self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_G2)) as u32));
             } else {
-                self.clearAllPinsAndActivate((GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2)) as u32);
+                self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2)) as u32));
             }
-            self.activatePins(GPIO_BIT!(PIN_CLK) as u32);
+            self.activatePins(&mut (GPIO_BIT!(PIN_CLK) as u32));
         }
-        self.clearPins((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_R2) | GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2) | GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2) | GPIO_BIT!(PIN_CLK) |) as u32);
-        self.clearAllPinsAndActivate(((GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C)) as u32));
-        self.activatePins(GPIO_BIT!(PIN_LAT) as u32);
-        self.clearPins(GPIO_BIT!(PIN_LAT) as u32);
-        self.clearPins(GPIO_BIT!(PIN_OE) as u32);
-        thread::sleep(time::Duration::from_millis(10));
-        self.activatePins(GPIO_BIT!(PIN_OE) as u32);
+        self.clearPins(&mut ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_R2) | GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2) | GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2) | GPIO_BIT!(PIN_CLK) |) as u32));
+        self.clearAllPinsAndActivate((&mut ((GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C)) as u32)));
+        self.activatePins(&mut (GPIO_BIT!(PIN_LAT) as u32));
+        self.clearPins(&mut (GPIO_BIT!(PIN_LAT) as u32));
+        self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
+        for x in 0..2000{
+            println!("{}",x)
+        }
+        // thread::sleep(time::Duration::from_millis(10));
+        self.activatePins(&mut (GPIO_BIT!(PIN_OE) as u32));
 
 
         /*self.configure_output_pin(PIN_OE);
