@@ -226,6 +226,10 @@ impl GPIO {
         unsafe { *pinOutputSet = *pinOutputSet | *bitmask }
         println!("{:#034b}", unsafe { *pinOutputSet });
         println!("{:#034b}", unsafe { *pinOutputClear });
+        println!("{:#034b},adr",self.gpio_read_bits_);
+        println!("{:#034b}", unsafe { *self.gpio_read_bits_ });
+
+
     }
 
     fn set_bits(self: &mut GPIO, row: u32, lineVec: Vec<Pixel>) {
@@ -243,9 +247,7 @@ impl GPIO {
             thread::sleep(Duration::new(0, 100000 * 1));
 
             self.activatePins(&mut (GPIO_BIT!(PIN_CLK) as u32));
-            thread::sleep(Duration::new(0, 100000 * 1));
 
-            self.clearPins(&mut (GPIO_BIT!(PIN_CLK) as u32));
         }
 
         thread::sleep(Duration::new(0, 100000 * 1));
