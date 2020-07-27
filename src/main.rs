@@ -216,6 +216,7 @@ impl GPIO {
         unsafe { *pinOutputClear = *pinOutputClear & *bitmask; }
     }
     fn clearAllPinsAndActivate(self: &mut GPIO, bitmask: &mut u32) {
+        println!("{}", bitmask);
         let mut pinOutputClear = self.gpio_clr_bits_;
         unsafe { *pinOutputClear = 0; }
 
