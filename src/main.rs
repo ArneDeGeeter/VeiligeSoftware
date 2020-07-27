@@ -217,19 +217,22 @@ impl GPIO {
     }
     fn clearAllPinsAndActivate(self: &mut GPIO, bitmask: &mut u32) {
         println!("{:#034b}", bitmask);
+
         let mut pinOutputClear = self.gpio_clr_bits_;
         unsafe { *pinOutputClear = 0; }
 
         let mut pinOutputSet = self.gpio_set_bits_;
         unsafe { *pinOutputSet = *pinOutputSet & *bitmask }
+        println!("{:#034b}", unsafe { *pinOutputSet });
+        println!("{:#034b}", unsafe { *pinOutputClear });
     }
 
     fn set_bits(self: &mut GPIO, row: u32, lineVec: Vec<Pixel>) {
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
-        thread::sleep(Duration::new(0, 1000000 * 3000));
+
+        thread::sleep(Duration::new(0, 1000000 * 300));
 
         // thread::sleep(time::Duration::from_millis(10));
-        self.activatePins(&mut (GPIO_BIT!(PIN_OE) as u32));
         for c in 0..15 {
             if (c % 2 == 1) {
                 self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_G2)) as u32));
@@ -244,10 +247,8 @@ impl GPIO {
         self.clearAllPinsAndActivate((&mut ((GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C)) as u32)));
         self.activatePins(&mut (GPIO_BIT!(PIN_LAT) as u32));
         self.clearPins(&mut (GPIO_BIT!(PIN_LAT) as u32));
-        self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
 
-        thread::sleep(Duration::new(0, 1000000 * 3000));
-        self.activatePins(&mut (GPIO_BIT!(PIN_OE) as u32));
+        thread::sleep(Duration::new(0, 1000000 * 300));
 
 
         /*self.configure_output_pin(PIN_OE);
