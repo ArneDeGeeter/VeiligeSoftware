@@ -234,19 +234,27 @@ impl GPIO {
         thread::sleep(Duration::new(0, 1000000 * 300));
 
         // thread::sleep(time::Duration::from_millis(10));
-        for c in 0..15 {
+        for c in 0..32 {
             if (c % 2 == 1) {
                 self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_G2)) as u32));
             } else {
                 self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2)) as u32));
             }
+            thread::sleep(Duration::new(0, 100000 * 1));
+
             self.activatePins(&mut (GPIO_BIT!(PIN_CLK) as u32));
+            thread::sleep(Duration::new(0, 100000 * 1));
+
             self.clearPins(&mut (GPIO_BIT!(PIN_CLK) as u32));
         }
 
+        thread::sleep(Duration::new(0, 100000 * 1));
         self.clearPins(&mut ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_R2) | GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2) | GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2) | GPIO_BIT!(PIN_CLK)) as u32));
+        thread::sleep(Duration::new(0, 100000 * 1));
         self.clearAllPinsAndActivate((&mut ((GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C)) as u32)));
+        thread::sleep(Duration::new(0, 100000 * 1));
         self.activatePins(&mut (GPIO_BIT!(PIN_LAT) as u32));
+        thread::sleep(Duration::new(0, 100000 * 1));
         self.clearPins(&mut (GPIO_BIT!(PIN_LAT) as u32));
 
         thread::sleep(Duration::new(0, 1000000 * 300));
