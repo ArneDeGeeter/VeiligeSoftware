@@ -307,7 +307,7 @@ impl GPIO {
             output_bits_: 0,
             input_bits_: 0,
             slowdown_: slowdown,
-            gpio_port_: 0 as *mut usize,
+            gpio_port_: 0 as *mut u32,
             gpio_set_bits_: 0 as *mut u32,
             gpio_clr_bits_: 0 as *mut u32,
             gpio_read_bits_: 0 as *mut u32,
