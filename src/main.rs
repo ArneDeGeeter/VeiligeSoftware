@@ -245,8 +245,14 @@ impl GPIO {
             } else {
                 self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2)) as u32));
             }
+            println!("{:#034b},read clk", unsafe { *self.gpio_read_bits_ });
 
             self.activatePins(&mut (GPIO_BIT!(PIN_CLK) as u32));
+            println!("{:#034b},read clk", unsafe { *self.gpio_read_bits_ });
+            self.clearPins(&mut (GPIO_BIT!(PIN_CLK) as u32));
+
+            println!("{:#034b},read clk", unsafe { *self.gpio_read_bits_ });
+
         }
 
 
@@ -263,8 +269,8 @@ impl GPIO {
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
         // println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
         thread::sleep(Duration::new(0, 150));
-    //    self.activatePins(&mut (GPIO_BIT!(PIN_OE) as u32));
-    //     println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
+        //    self.activatePins(&mut (GPIO_BIT!(PIN_OE) as u32));
+        //     println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
 
         /*self.configure_output_pin(PIN_OE);
         self.configure_output_pin(PIN_C);
