@@ -236,45 +236,38 @@ impl GPIO {
     }
 
     fn set_bits(self: &mut GPIO, row: u32, lineVec: Vec<Pixel>) {
-        println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
-        self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
-        println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
+
         self.clearAllPins();
         println!("{:#034b},read 2", unsafe { *self.gpio_read_bits_ });
 
-        thread::sleep(Duration::new(0, 1000000 * 300));
-
-        // thread::sleep(time::Duration::from_millis(10));
         for c in 0..32 {
             if (c % 2 == 1) {
                 self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_G2)) as u32));
             } else {
                 self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2)) as u32));
             }
-            thread::sleep(Duration::new(0, 100000 * 1));
 
             self.activatePins(&mut (GPIO_BIT!(PIN_CLK) as u32));
         }
 
-        thread::sleep(Duration::new(0, 100000 * 1));
         println!("{:#034b},read clear", unsafe { *self.gpio_read_bits_ });
 
         self.clearPins(&mut ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_R2) | GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2) | GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2) | GPIO_BIT!(PIN_CLK)) as u32));
         println!("{:#034b},read clear", unsafe { *self.gpio_read_bits_ });
 
-        thread::sleep(Duration::new(0, 100000 * 1));
         self.clearAllPinsAndActivate((&mut ((GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C)) as u32)));
-        thread::sleep(Duration::new(0, 100000 * 1));
         self.activatePins(&mut (GPIO_BIT!(PIN_LAT) as u32));
 
         println!("{:#034b},read", unsafe { *self.gpio_read_bits_ });
-        thread::sleep(Duration::new(0, 100000 * 1));
         self.clearPins(&mut (GPIO_BIT!(PIN_LAT) as u32));
         println!("{:#034b},read", unsafe { *self.gpio_read_bits_ });
 
-
-        thread::sleep(Duration::new(0, 1000000 * 300));
-
+        println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
+        self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
+        println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
+        thread::sleep(Duration::new(0,  150));
+        self.activatePins(&mut (GPIO_BIT!(PIN_OE) as u32));
+        println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
 
         /*self.configure_output_pin(PIN_OE);
         self.configure_output_pin(PIN_C);
