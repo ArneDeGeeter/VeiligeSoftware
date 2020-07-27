@@ -227,7 +227,7 @@ impl GPIO {
     fn clearAllPinsAndActivate(self: &mut GPIO, bitmask: &mut u32) {
         self.clearAllPins();
         let mut pinOutputSet = self.gpio_set_bits_;
-        unsafe { *pinOutputSet = *pinOutputSet | *bitmask }
+        unsafe { *pinOutputSet = *bitmask }
         // println!("{:#034b},set", unsafe { *pinOutputSet });
         // println!("{:#034b},clear", unsafe { *pinOutputClear });
         // println!("{:?},adr",self.gpio_read_bits_);
@@ -246,7 +246,7 @@ impl GPIO {
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
         for c in 0..32 {
             if (c % 2 == 1) {
-                self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_G1)) as u32));
+                self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_R1)) as u32));
                 // self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2)) as u32));
             } else {
                 self.clearAllPins();
