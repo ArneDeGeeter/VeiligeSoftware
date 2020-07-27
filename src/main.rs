@@ -217,10 +217,10 @@ impl GPIO {
         unsafe { *pinOutputClear = *pinOutputClear & *bitmask; }
     }
     fn clearAllPinsAndActivate(self: &mut GPIO, bitmask: &mut u32) {
-        let mut pinOutputClear = (BCM2709_PERI_BASE+GPIO_REGISTER_OFFSET + 0x28) as *mut u32;
+        let mut pinOutputClear = self.gpio_clr_bits_;
         unsafe { *pinOutputClear = 0; }
 
-        let mut pinOutputSet = (BCM2709_PERI_BASE+GPIO_REGISTER_OFFSET + 0x1C) as *mut u32;
+        let mut pinOutputSet =self.gpio_set_bits_;
         unsafe { *pinOutputSet = *pinOutputSet & *bitmask }
     }
 
@@ -232,8 +232,9 @@ impl GPIO {
         println!("{}var", var);
         var = var + 1;
         for x in 0..10000 {
-            print!("{}", x)
+            print!("{},", x)
         }
+        println!();
         // thread::sleep(time::Duration::from_millis(10));
         self.activatePins(&mut (GPIO_BIT!(PIN_OE) as u32));
         println!("{}var", var);
