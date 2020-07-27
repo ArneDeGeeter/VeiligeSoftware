@@ -226,17 +226,18 @@ impl GPIO {
 
     fn set_bits(self: &mut GPIO, row: u32, lineVec: Vec<Pixel>) {
         let mut var = 0;
-        println!("{}", var);
+        println!("{}var", var);
         var = var + 1;
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
-        println!("{}", var);
+        println!("{}var", var);
         var = var + 1;
-        for x in 0..2000 {
-            println!("{}", x)
+        for x in 0..10000 {
+            print!("{}", x)
         }
         // thread::sleep(time::Duration::from_millis(10));
         self.activatePins(&mut (GPIO_BIT!(PIN_OE) as u32));
-
+        println!("{}var", var);
+        var = var + 1;
         for c in 0..15 {
             if (c % 2 == 1) {
                 self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_G2)) as u32));
