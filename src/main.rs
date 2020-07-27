@@ -243,7 +243,7 @@ impl GPIO {
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
         for c in 0..32 {
             if (c % 2 == 1) {
-                self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_R2)) as u32));
+                self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_G1)) as u32));
                 // self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2)) as u32));
             } else {
                 self.clearAllPins();
