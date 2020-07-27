@@ -238,7 +238,9 @@ impl GPIO {
     }
     fn shutdown(self: &mut GPIO) {
         self.clearAllPins();
+        self.activatePins(&mut (GPIO_BIT!(PIN_LAT) as u32));
 
+        self.clearPins(&mut (GPIO_BIT!(PIN_LAT) as u32));
 
 
         self.activatePins(&mut ((GPIO_BIT!(PIN_OE)) as u32));
@@ -554,6 +556,7 @@ pub fn main() {
     }
     println!("Exiting.");
     if interrupt_received.load(Ordering::SeqCst) == true {
+        GPIO.shutdown();
         println!("Received CTRL-C");
     } else {
         println!("Timeout reached");
