@@ -206,7 +206,6 @@ impl GPIO {
         // TODO: Implement this yourself. Note: this function expects          a bitmask as the @outputs argument
     }
     fn activatePins(self: &mut GPIO, bitmask: &mut u32) {
-
         let mut pinOutputSet = self.gpio_set_bits_;
 
         unsafe { *pinOutputSet = *pinOutputSet & *bitmask; }
@@ -220,25 +219,16 @@ impl GPIO {
         let mut pinOutputClear = self.gpio_clr_bits_;
         unsafe { *pinOutputClear = 0; }
 
-        let mut pinOutputSet =self.gpio_set_bits_;
+        let mut pinOutputSet = self.gpio_set_bits_;
         unsafe { *pinOutputSet = *pinOutputSet & *bitmask }
     }
 
     fn set_bits(self: &mut GPIO, row: u32, lineVec: Vec<Pixel>) {
-        let mut var = 0;
-        println!("{}var", var);
-        var = var + 1;
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
-        println!("{}var", var);
-        var = var + 1;
-        for x in 0..10000 {
-            print!("{},", x)
-        }
-        println!();
+        thread::sleep(Duration::new(0, 1000000 * 300));
+
         // thread::sleep(time::Duration::from_millis(10));
         self.activatePins(&mut (GPIO_BIT!(PIN_OE) as u32));
-        println!("{}var", var);
-        var = var + 1;
         for c in 0..15 {
             if (c % 2 == 1) {
                 self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_G2)) as u32));
@@ -247,18 +237,14 @@ impl GPIO {
             }
             self.activatePins(&mut (GPIO_BIT!(PIN_CLK) as u32));
         }
-        println!("{}", var);
-        var = var + 1;
 
         self.clearPins(&mut ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_R2) | GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2) | GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2) | GPIO_BIT!(PIN_CLK)) as u32));
         self.clearAllPinsAndActivate((&mut ((GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C)) as u32)));
         self.activatePins(&mut (GPIO_BIT!(PIN_LAT) as u32));
         self.clearPins(&mut (GPIO_BIT!(PIN_LAT) as u32));
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
-        for x in 0..2000 {
-            println!("{}", x)
-        }
-        // thread::sleep(time::Duration::from_millis(10));
+
+        thread::sleep(Duration::new(0, 1000000 * 300));
         self.activatePins(&mut (GPIO_BIT!(PIN_OE) as u32));
 
 
@@ -275,12 +261,7 @@ impl GPIO {
         self.configure_output_pin(PIN_LAT);
         self.configure_output_pin(PIN_CLK);
         self.configure_output_pin(PIN_CLK);*/
-        println!("abc");
-        unsafe {
-            println!("{},{:?},", *self.gpio_set_bits_, self.gpio_set_bits_);
-            *self.gpio_set_bits_ = 2 ^ 31 - 1;
-            println!("{},{:?},", *self.gpio_set_bits_, self.gpio_set_bits_);
-        }
+
         // TODO: Implement this yourself. Remember to take the slowdown_ value into account!
         // This function expects a bitmask as the @value argument
     }
@@ -537,8 +518,8 @@ pub fn main() {
     ctrlc::set_handler(move || {
         int_recv.store(true, Ordering::SeqCst);
     }).unwrap();
-    GPIO.set_bits(0, Vec::new());
     while interrupt_received.load(Ordering::SeqCst) == false {
+        GPIO.set_bits(0, Vec::new());
 
 // TODO: Implement your rendering loop here
     }
