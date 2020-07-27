@@ -216,17 +216,17 @@ impl GPIO {
         unsafe { *pinOutputClear = *pinOutputClear & *bitmask; }
     }
     fn clearAllPinsAndActivate(self: &mut GPIO, bitmask: &mut u32) {
-        println!("{:#034b}", bitmask);
+      //  println!("{:#034b}", bitmask);
 
         let mut pinOutputClear = self.gpio_clr_bits_;
         unsafe { *pinOutputClear = 0; }
 
         let mut pinOutputSet = self.gpio_set_bits_;
-        println!("{:#034b},and", unsafe { *pinOutputSet | *bitmask });
+        // println!("{:#034b},and", unsafe { *pinOutputSet | *bitmask });
         unsafe { *pinOutputSet = *pinOutputSet | *bitmask }
-        println!("{:#034b}", unsafe { *pinOutputSet });
-        println!("{:#034b}", unsafe { *pinOutputClear });
-        println!("{:?},adr",self.gpio_read_bits_);
+        // println!("{:#034b}", unsafe { *pinOutputSet });
+        // println!("{:#034b}", unsafe { *pinOutputClear });
+        // println!("{:?},adr",self.gpio_read_bits_);
         println!("{:#034b}", unsafe { *self.gpio_read_bits_ });
 
 
@@ -299,6 +299,7 @@ impl GPIO {
 
         // Map the GPIO register file. See section 2.1 in the assignment for details
         let map = mmap_bcm_register((BCM2709_PERI_BASE+GPIO_REGISTER_OFFSET) as usize);
+        println!("{:?}",(BCM2709_PERI_BASE+GPIO_REGISTER_OFFSET) as usize);
 
         // Initialize the GPIO struct with default values
         let mut io: GPIO = GPIO {
