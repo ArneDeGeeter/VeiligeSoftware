@@ -241,13 +241,14 @@ impl GPIO {
         self.activatePins(&mut ((GPIO_BIT!(PIN_OE)) as u32));
     }
     fn set_bits(self: &mut GPIO, row: u32, lineVec: Vec<Pixel>) {
-        self.clearAllPins();
-
+        // self.clearAllPins();
+        self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
         for c in 0..31 {
             if (c % 2 == 1) {
-                self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2)) as u32));
+                self.activatePins(&mut ((GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2)) as u32));
+                // self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2)) as u32));
             } else {
-                self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_R2)) as u32));
+                // self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_R2)) as u32));
             }
 
             self.activatePins(&mut (GPIO_BIT!(PIN_CLK) as u32));
