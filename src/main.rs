@@ -260,7 +260,7 @@ impl GPIO {
         self.clearPins(&mut ((GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C) | GPIO_BIT!(PIN_B) | GPIO_BIT!(PIN_D) | GPIO_BIT!(PIN_E)) as u32));
         println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
 
-        self.activatePins((&mut ((GPIO_BIT!(PIN_B)) as u32)));
+        self.activatePins((&mut ((GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C)) as u32)));
         println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
 
         self.activatePins(&mut (GPIO_BIT!(PIN_LAT) as u32));
