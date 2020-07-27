@@ -226,7 +226,6 @@ impl GPIO {
         unsafe { *pinOutputClear = 0b00000000100000010011000001100000; }
 
         let mut pinOutputSet = self.gpio_set_bits_;
-        println!("{:#034b},or", unsafe { *pinOutputSet | *bitmask });
         unsafe { *pinOutputSet = *pinOutputSet | *bitmask }
         // println!("{:#034b},set", unsafe { *pinOutputSet });
         // println!("{:#034b},clear", unsafe { *pinOutputClear });
@@ -256,10 +255,13 @@ impl GPIO {
         }
 
 
-        self.clearPins(&mut ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_R2) | GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2) | GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2) | GPIO_BIT!(PIN_CLK)) as u32));
+        self.clearPins(&mut ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_R2) | GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2) | GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2)) as u32));
+        self.clearPins(&mut ((GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C) | GPIO_BIT!(PIN_B) | GPIO_BIT!(PIN_D) | GPIO_BIT!(PIN_E)) as u32));
         println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
 
         self.activatePins((&mut ((GPIO_BIT!(PIN_B)) as u32)));
+        println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
+
         self.activatePins(&mut (GPIO_BIT!(PIN_LAT) as u32));
 
         self.clearPins(&mut (GPIO_BIT!(PIN_LAT) as u32));
