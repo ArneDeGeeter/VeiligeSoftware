@@ -17,7 +17,7 @@ extern crate nix;
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use std::{fs::OpenOptions, os::unix::fs::OpenOptionsExt};
+use std::{fs::OpenOptions, os::unix::fs::OpenOptionsExt, thread};
 use std::error::Error;
 use std::os::unix::io::AsRawFd;
 use std::path::Path;
@@ -205,9 +205,43 @@ impl GPIO {
         0
         // TODO: Implement this yourself. Note: this function expects          a bitmask as the @outputs argument
     }
+    fn activatePins(self: &mut GPIO, bitmask: u32) {
+        let mut pinOutputSet = *(GPIO_REGISTER_OFFSET + 0x1C) as u32;
+        pinOutputSet = pinOutputSet | bitmask;
+        unsafe {}
+    }
+    fn clearPins(self: &mut GPIO, bitmask: u32) {
+        let mut pinOutputClear = *(GPIO_REGISTER_OFFSET + 0x28) as u32;
+        pinOutputClear = pinOutputClear | bitmask;
+    }
+    fn clearAllPinsAndActivate(self: &mut GPIO, bitmask: u32) {
+        let mut pinOutputClear = *(GPIO_REGISTER_OFFSET + 0x28) as u32;
+        pinOutputClear = 0;
+
+        let mut pinOutputSet = *(GPIO_REGISTER_OFFSET + 0x1C) as u32;
+        pinOutputSet = pinOutputSet & bitmask;
+    }
 
     fn set_bits(self: &mut GPIO, row: u32, lineVec: Vec<Pixel>) {
-        self.configure_output_pin(PIN_OE);
+        self.clearPins(GPIO_BIT!(PIN_OE) as u32);
+        for c in 0..15 {
+            if (c % 2 == 1) {
+                self.clearAllPinsAndActivate((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_G2)) as u32);
+            } else {
+                self.clearAllPinsAndActivate((GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2)) as u32);
+            }
+            self.activatePins(GPIO_BIT!(PIN_CLK) as u32);
+        }
+        self.clearPins((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_R2) | GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2) | GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2) | GPIO_BIT!(PIN_CLK) |) as u32);
+        self.clearAllPinsAndActivate(((GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C)) as u32));
+        self.activatePins(GPIO_BIT!(PIN_LAT) as u32);
+        self.clearPins(GPIO_BIT!(PIN_LAT) as u32);
+        self.clearPins(GPIO_BIT!(PIN_OE) as u32);
+        thread::sleep(time::Duration::from_millis(10));
+        self.activatePins(GPIO_BIT!(PIN_OE) as u32);
+
+
+        /*self.configure_output_pin(PIN_OE);
         self.configure_output_pin(PIN_C);
         self.configure_output_pin(PIN_R1);
         self.configure_output_pin(PIN_R2);
@@ -219,7 +253,7 @@ impl GPIO {
         self.configure_output_pin(PIN_LAT);
         self.configure_output_pin(PIN_LAT);
         self.configure_output_pin(PIN_CLK);
-        self.configure_output_pin(PIN_CLK);
+        self.configure_output_pin(PIN_CLK);*/
         println!("abc");
         unsafe {
             println!("{},{:?},", *self.gpio_set_bits_, self.gpio_set_bits_);
@@ -329,14 +363,11 @@ pub fn read_bmp() { //-> Result<Image, std::io::Error> {
         panic!("Failed to open: {}", e);
     });
 
-    for(x, y) in img.coordinates() {
+    for (x, y) in img.coordinates() {
         let px = img.get_pixel(x, y);
         println!("X: {}, y: {} \n", x, y);
         println!("R: {}, G: {}, B: {} \n", px.r, px.g, px.b);
-
     };
-
-
 }
 
 
