@@ -209,7 +209,7 @@ impl GPIO {
     fn activatePins(self: &mut GPIO, bitmask: &mut u32) {
         let mut pinOutputSet = self.gpio_set_bits_;
 
-        unsafe { *pinOutputSet = *pinOutputSet & *bitmask; }
+        unsafe { *pinOutputSet = *pinOutputSet & 0b00000001111000000000000001110000; }
     }
     fn clearPins(self: &mut GPIO, bitmask: &mut u32) {
         let mut pinOutputClear = self.gpio_clr_bits_;
