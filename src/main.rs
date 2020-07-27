@@ -243,7 +243,7 @@ impl GPIO {
     fn set_bits(self: &mut GPIO, row: u32, lineVec: Vec<Pixel>) {
         self.clearAllPins();
 
-        for c in 0..32 {
+        for c in 0..31 {
             if (c % 2 == 1) {
                 self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2)) as u32));
             } else {
