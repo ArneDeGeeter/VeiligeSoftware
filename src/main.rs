@@ -298,8 +298,8 @@ impl GPIO {
     fn new(slowdown: u32) -> GPIO {
 
         // Map the GPIO register file. See section 2.1 in the assignment for details
-        let map = mmap_bcm_register((BCM2709_PERI_BASE+GPIO_REGISTER_OFFSET) as usize);
-        println!("{:?}",(BCM2709_PERI_BASE+GPIO_REGISTER_OFFSET) as usize);
+        let map = mmap_bcm_register((GPIO_REGISTER_OFFSET) as usize);
+        println!("{:?}",(GPIO_REGISTER_OFFSET) as usize);
 
         // Initialize the GPIO struct with default values
         let mut io: GPIO = GPIO {
@@ -318,7 +318,7 @@ impl GPIO {
         match &map {
             Some(m) => {
                 unsafe {
-                    io.gpio_port_ = (BCM2709_PERI_BASE+GPIO_REGISTER_OFFSET) as *mut u32;//m.data() as *mut u32;
+                    io.gpio_port_ = m.data() as *mut u32;
                     io.gpio_set_bits_ = (io.gpio_port_ as usize + 0x1C) as *mut u32;
                     io.gpio_clr_bits_ = (io.gpio_port_ as usize + 0x28) as *mut u32;
                     io.gpio_read_bits_ = (io.gpio_port_ as usize + 0x34) as *mut u32;
