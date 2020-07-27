@@ -216,7 +216,7 @@ impl GPIO {
         unsafe { *pinOutputClear = *pinOutputClear & *bitmask; }
     }
     fn clearAllPinsAndActivate(self: &mut GPIO, bitmask: &mut u32) {
-      //  println!("{:#034b}", bitmask);
+        //  println!("{:#034b}", bitmask);
 
         let mut pinOutputClear = self.gpio_clr_bits_;
         unsafe { *pinOutputClear = 0; }
@@ -227,15 +227,13 @@ impl GPIO {
         // println!("{:#034b},set", unsafe { *pinOutputSet });
         // println!("{:#034b},clear", unsafe { *pinOutputClear });
         // println!("{:?},adr",self.gpio_read_bits_);
-
-
     }
 
     fn set_bits(self: &mut GPIO, row: u32, lineVec: Vec<Pixel>) {
-        println!("{:#034b},read", unsafe { *self.gpio_read_bits_ });
+        println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
-        println!("{:#034b},read", unsafe { *self.gpio_read_bits_ });
-        
+        println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
+
         thread::sleep(Duration::new(0, 1000000 * 300));
 
         // thread::sleep(time::Duration::from_millis(10));
@@ -248,7 +246,6 @@ impl GPIO {
             thread::sleep(Duration::new(0, 100000 * 1));
 
             self.activatePins(&mut (GPIO_BIT!(PIN_CLK) as u32));
-
         }
 
         thread::sleep(Duration::new(0, 100000 * 1));
@@ -304,7 +301,7 @@ impl GPIO {
 
         // Map the GPIO register file. See section 2.1 in the assignment for details
         let map = mmap_bcm_register((GPIO_REGISTER_OFFSET) as usize);
-        println!("{:?}",(GPIO_REGISTER_OFFSET) as usize);
+        println!("{:?}", (GPIO_REGISTER_OFFSET) as usize);
 
         // Initialize the GPIO struct with default values
         let mut io: GPIO = GPIO {
@@ -324,13 +321,13 @@ impl GPIO {
             Some(m) => {
                 unsafe {
                     io.gpio_port_ = m.data() as *mut u32;
-                    io.gpio_set_bits_ = (io.gpio_port_ as usize + 0x1C) as *mut u32;
-                    io.gpio_clr_bits_ = (io.gpio_port_ as usize + 0x28) as *mut u32;
-                    io.gpio_read_bits_ = (io.gpio_port_ as usize + 0x34) as *mut u32;
-                    println!("{:?}",io.gpio_port_);
-                    println!("{:?}",io.gpio_set_bits_);
-                    println!("{:?}",io.gpio_clr_bits_);
-                    println!("{:?}",io.gpio_read_bits_);
+                    io.gpio_set_bits_ = (io.gpio_port_.offset(0x1C));
+                    io.gpio_clr_bits_ = (io.gpio_port_.offset(0x28));
+                    io.gpio_read_bits_ = (io.gpio_port_.offset(0x34));
+                    println!("{:?}", io.gpio_port_);
+                    println!("{:?}", io.gpio_set_bits_);
+                    println!("{:?}", io.gpio_clr_bits_);
+                    println!("{:?}", io.gpio_read_bits_);
 
                     // TODO: Calculate the correct values of the other raw pointers here.
                     // You should use the offset() method on the gpio_port_ pointer.
