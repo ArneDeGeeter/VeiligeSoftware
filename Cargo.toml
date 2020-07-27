@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["stijn-volckaert"]
 
 [dependencies]
+bmp = "*"
 libc="0.2"
 time="0.1"
 ctrlc="3.1.1"

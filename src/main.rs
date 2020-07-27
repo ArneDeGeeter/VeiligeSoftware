@@ -189,10 +189,10 @@ impl GPIO {
         println!("{:#034b},{}", current_val, pin_num);
         // the bit range within the register is [(pin_num % 10) * 3 .. (pin_num % 10) * 3 + 2]
         // we need to set these bits to 001
-        println!("{:#034b}",!(7 << ((pin_num % 10) * 3)));
-        println!("{:#034b}",(1 << ((pin_num % 10) * 3)));
-        println!("{:#034b}",((current_val & !(7 << ((pin_num % 10) * 3)) as u32)));
-        println!("{:#034b}",((current_val & !(7 << ((pin_num % 10) * 3)) as u32) | (1 << ((pin_num % 10) * 3)) as u32));
+        println!("{:#034b}", !(7 << ((pin_num % 10) * 3)));
+        println!("{:#034b}", (1 << ((pin_num % 10) * 3)));
+        println!("{:#034b}", ((current_val & !(7 << ((pin_num % 10) * 3)) as u32)));
+        println!("{:#034b}", ((current_val & !(7 << ((pin_num % 10) * 3)) as u32) | (1 << ((pin_num % 10) * 3)) as u32));
         let new_val = (current_val & !(7 << ((pin_num % 10) * 3))) | (1 << ((pin_num % 10) * 3));
         println!("{},{}", new_val, pin_num);
 
@@ -322,6 +322,23 @@ impl Timer {
 // on the LED board. In most cases, the Frame will have less pixels
 // than the input Image!
 impl Frame {}
+
+//First implementation of BMP parser
+pub fn read_bmp() { //-> Result<Image, std::io::Error> {
+    let img = bmp::open("dog.bmp").unwrap_or_else(|e| {
+        panic!("Failed to open: {}", e);
+    });
+
+    for(x, y) in img.coordinates() {
+        let px = img.get_pixel(x, y);
+        println!("X: {}, y: {} \n", x, y);
+        println!("R: {}, G: {}, B: {} \n", px.r, px.g, px.b);
+
+    };
+
+
+}
+
 
 // TODO: Add your PPM parser here
 // NOTE/WARNING: Please make sure that your implementation can handle comments in the PPM file
