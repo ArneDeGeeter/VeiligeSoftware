@@ -206,20 +206,20 @@ impl GPIO {
         // TODO: Implement this yourself. Note: this function expects          a bitmask as the @outputs argument
     }
     fn activatePins(self: &mut GPIO, bitmask: &mut u32) {
-        let mut pinOutputSet = (GPIO_REGISTER_OFFSET + 0x1C) as * mut u32;
-        pinOutputSet = pinOutputSet | bitmask;
+        let mut pinOutputSet = (GPIO_REGISTER_OFFSET + 0x1C) as *mut u32;
+        unsafe { *pinOutputSet = *pinOutputSet | *bitmask; }
         unsafe {}
     }
     fn clearPins(self: &mut GPIO, bitmask: &mut u32) {
-        let mut pinOutputClear = (GPIO_REGISTER_OFFSET + 0x28) as * mut u32;
-        pinOutputClear = pinOutputClear | bitmask;
+        let mut pinOutputClear = (GPIO_REGISTER_OFFSET + 0x28) as *mut u32;
+        unsafe { *pinOutputClear = *pinOutputClear | *bitmask; }
     }
     fn clearAllPinsAndActivate(self: &mut GPIO, bitmask: &mut u32) {
-        let mut pinOutputClear = (GPIO_REGISTER_OFFSET + 0x28) as * mut u32;
-        pinOutputClear = 0;
+        let mut pinOutputClear = (GPIO_REGISTER_OFFSET + 0x28) as *mut u32;
+        unsafe { *pinOutputClear = 0; }
 
-        let mut pinOutputSet = (GPIO_REGISTER_OFFSET + 0x1C) as * mut u32;
-        pinOutputSet = pinOutputSet & bitmask;
+        let mut pinOutputSet = (GPIO_REGISTER_OFFSET + 0x1C) as *mut u32;
+        unsafe { *pinOutputSet = *pinOutputSet & *bitmask }
     }
 
     fn set_bits(self: &mut GPIO, row: u32, lineVec: Vec<Pixel>) {
@@ -232,13 +232,13 @@ impl GPIO {
             }
             self.activatePins(&mut (GPIO_BIT!(PIN_CLK) as u32));
         }
-        self.clearPins(&mut ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_R2) | GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2) | GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2) | GPIO_BIT!(PIN_CLK) |) as u32));
+        self.clearPins(&mut ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_R2) | GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2) | GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2) | GPIO_BIT!(PIN_CLK)) as u32));
         self.clearAllPinsAndActivate((&mut ((GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C)) as u32)));
         self.activatePins(&mut (GPIO_BIT!(PIN_LAT) as u32));
         self.clearPins(&mut (GPIO_BIT!(PIN_LAT) as u32));
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
-        for x in 0..2000{
-            println!("{}",x)
+        for x in 0..2000 {
+            println!("{}", x)
         }
         // thread::sleep(time::Duration::from_millis(10));
         self.activatePins(&mut (GPIO_BIT!(PIN_OE) as u32));
@@ -273,7 +273,7 @@ impl GPIO {
     }
 
     // Write all the bits of @value that also appear in @mask. Leave the rest untouched.
-    // @value and @mask are bitmasks
+// @value and @mask are bitmasks
     fn write_masked_bits(
         self: &mut GPIO,
         value: u32,
@@ -340,17 +340,17 @@ impl Timer {
     fn new() -> Timer {
         let mut var = (BCM2709_PERI_BASE + TIMER_REGISTER_OFFSET + 0x4) as *mut u32;
         Timer { _timemap: mmap_bcm_register((GPIO_REGISTER_OFFSET + TIMER_REGISTER_OFFSET) as usize), timereg: var }
-        // TODO: timemap?.
+// TODO: timemap?.
     }
 
     // High-precision sleep function (see section 2.5 in the assignment)
-    // NOTE/WARNING: Since the raspberry pi's timer frequency is only 1Mhz, 
-    // you cannot reach full nanosecond precision here. You will have to think
-    // about how you can approximate the desired precision. Obviously, there is
-    // no perfect solution here.
+// NOTE/WARNING: Since the raspberry pi's timer frequency is only 1Mhz,
+// you cannot reach full nanosecond precision here. You will have to think
+// about how you can approximate the desired precision. Obviously, there is
+// no perfect solution here.
     fn nanosleep(self: &Timer, mut nanos: u32) {
 //todo sleep
-        // libc::nanosleep(&Timespec::new(0, nanos as i32),&Timespec::new(0, nanos as i32));
+// libc::nanosleep(&Timespec::new(0, nanos as i32),&Timespec::new(0, nanos as i32));
     }
 }
 
@@ -476,11 +476,11 @@ pub fn read_ppm() -> Result<Image, std::io::Error> {
         Ok(file) => file
     };
 
-    // read the full file into memory. panic on failure
+// read the full file into memory. panic on failure
     let mut raw_file = Vec::new();
     file.read_to_end(&mut raw_file).unwrap();
 
-    // construct a cursor so we can seek in the raw buffer
+// construct a cursor so we can seek in the raw buffer
     let mut cursor = Cursor::new(raw_file);
     let image = match decode_ppm_image(&mut cursor) {
         Ok(img) => img,
@@ -495,7 +495,7 @@ pub fn main() {
     let args: Vec<String> = std::env::args().collect();
     let interrupt_received = Arc::new(AtomicBool::new(false));
 
-    // sanity checks
+// sanity checks
     if nix::unistd::Uid::current().is_root() == false {
         eprintln!("Must run as root to be able to access /dev/mem\nPrepend \'sudo\' to the command");
         std::process::exit(1);
@@ -504,7 +504,7 @@ pub fn main() {
         std::process::exit(1);
     }
 
-    // TODO: Read the PPM file here. You can find its name in args[1]
+// TODO: Read the PPM file here. You can find its name in args[1]
     let image = match read_ppm() {
         Ok(img) => img,
         Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
@@ -513,8 +513,8 @@ pub fn main() {
     let mut GPIO = GPIO::new(500);
     let mut timer = Timer::new();
 
-    // This code sets up a CTRL-C handler that writes "true" to the 
-    // interrupt_received bool.
+// This code sets up a CTRL-C handler that writes "true" to the
+// interrupt_received bool.
     let int_recv = interrupt_received.clone();
     ctrlc::set_handler(move || {
         int_recv.store(true, Ordering::SeqCst);
@@ -522,7 +522,7 @@ pub fn main() {
     GPIO.set_bits(0, Vec::new());
     while interrupt_received.load(Ordering::SeqCst) == false {
 
-        // TODO: Implement your rendering loop here
+// TODO: Implement your rendering loop here
     }
     println!("Exiting.");
     if interrupt_received.load(Ordering::SeqCst) == true {
@@ -531,5 +531,5 @@ pub fn main() {
         println!("Timeout reached");
     }
 
-    // TODO: You may want to reset the board here (i.e., disable all LEDs)
+// TODO: You may want to reset the board here (i.e., disable all LEDs)
 }
