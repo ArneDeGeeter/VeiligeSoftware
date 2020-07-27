@@ -206,6 +206,7 @@ impl GPIO {
         0
         // TODO: Implement this yourself. Note: this function expects          a bitmask as the @outputs argument
     }
+
     fn activatePins(self: &mut GPIO, bitmask: &mut u32) {
         let mut pinOutputSet = self.gpio_set_bits_;
         println!("{:#034b}", *bitmask);
@@ -220,7 +221,7 @@ impl GPIO {
     fn clearAllPins(self: &mut GPIO) {
         let mut pinOutputClear = self.gpio_clr_bits_;
 
-        unsafe { *pinOutputClear = 0b11111111111111111111111111111111; }
+        unsafe { *pinOutputClear = 0b00001101110100010011000001100000; }
     }
     fn clearAllPinsAndActivate(self: &mut GPIO, bitmask: &mut u32) {
         //  println!("{:#034b}", bitmask);
@@ -244,7 +245,7 @@ impl GPIO {
             if (c % 2 == 1) {
                 self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_G2)) as u32));
             } else {
-                self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2)) as u32));
+                self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_B2)) as u32));
             }
             println!("{:#034b},read clk", unsafe { *self.gpio_read_bits_ });
 
