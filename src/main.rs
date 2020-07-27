@@ -307,7 +307,7 @@ impl GPIO {
             output_bits_: 0,
             input_bits_: 0,
             slowdown_: slowdown,
-            gpio_port_: 0 as *mut u32,
+            gpio_port_: 0 as *mut usize,
             gpio_set_bits_: 0 as *mut u32,
             gpio_clr_bits_: 0 as *mut u32,
             gpio_read_bits_: 0 as *mut u32,
@@ -318,7 +318,7 @@ impl GPIO {
         match &map {
             Some(m) => {
                 unsafe {
-                    io.gpio_port_ = m.data() as *mut u32;
+                    io.gpio_port_ = (BCM2709_PERI_BASE+GPIO_REGISTER_OFFSET) as *mut u32;//m.data() as *mut u32;
                     io.gpio_set_bits_ = (io.gpio_port_ as usize + 0x1C) as *mut u32;
                     io.gpio_clr_bits_ = (io.gpio_port_ as usize + 0x28) as *mut u32;
                     io.gpio_read_bits_ = (io.gpio_port_ as usize + 0x34) as *mut u32;
