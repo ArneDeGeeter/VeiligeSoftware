@@ -321,9 +321,9 @@ impl GPIO {
             Some(m) => {
                 unsafe {
                     io.gpio_port_ = m.data() as *mut u32;
-                    io.gpio_set_bits_ = (io.gpio_port_.offset(0x1C));
-                    io.gpio_clr_bits_ = (io.gpio_port_.offset(0x28));
-                    io.gpio_read_bits_ = (io.gpio_port_.offset(0x34));
+                    io.gpio_set_bits_ = (io.gpio_port_.offset(7));
+                    io.gpio_clr_bits_ = (io.gpio_port_.offset(10));
+                    io.gpio_read_bits_ = (io.gpio_port_.offset(13));
                     println!("{:?}", io.gpio_port_);
                     println!("{:?}", io.gpio_set_bits_);
                     println!("{:?}", io.gpio_clr_bits_);
