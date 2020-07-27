@@ -249,7 +249,11 @@ impl GPIO {
         }
 
         thread::sleep(Duration::new(0, 100000 * 1));
+        println!("{:#034b},read clear", unsafe { *self.gpio_read_bits_ });
+
         self.clearPins(&mut ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_R2) | GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2) | GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2) | GPIO_BIT!(PIN_CLK)) as u32));
+        println!("{:#034b},read clear", unsafe { *self.gpio_read_bits_ });
+
         thread::sleep(Duration::new(0, 100000 * 1));
         self.clearAllPinsAndActivate((&mut ((GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C)) as u32)));
         thread::sleep(Duration::new(0, 100000 * 1));
