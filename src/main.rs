@@ -206,7 +206,6 @@ impl GPIO {
         0
         // TODO: Implement this yourself. Note: this function expects          a bitmask as the @outputs argument
     }
-    fn clock()
     fn activatePins(self: &mut GPIO, bitmask: &mut u32) {
         let mut pinOutputSet = self.gpio_set_bits_;
 
