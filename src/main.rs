@@ -206,19 +206,20 @@ impl GPIO {
         // TODO: Implement this yourself. Note: this function expects          a bitmask as the @outputs argument
     }
     fn activatePins(self: &mut GPIO, bitmask: &mut u32) {
-        let mut pinOutputSet = (GPIO_REGISTER_OFFSET + 0x1C) as *mut u32;
+        let mut pinOutputSet = (BCM2709_PERI_BASE+GPIO_REGISTER_OFFSET + 0x1C) as *mut u32;
         unsafe { *pinOutputSet = *pinOutputSet | *bitmask; }
         unsafe {}
     }
     fn clearPins(self: &mut GPIO, bitmask: &mut u32) {
-        let mut pinOutputClear = (GPIO_REGISTER_OFFSET + 0x28) as *mut u32;
+        let mut pinOutputClear = (BCM2709_PERI_BASE+GPIO_REGISTER_OFFSET + 0x28) as *mut u32;
+
         unsafe { *pinOutputClear = *pinOutputClear | *bitmask; }
     }
     fn clearAllPinsAndActivate(self: &mut GPIO, bitmask: &mut u32) {
-        let mut pinOutputClear = (GPIO_REGISTER_OFFSET + 0x28) as *mut u32;
+        let mut pinOutputClear = (BCM2709_PERI_BASE+GPIO_REGISTER_OFFSET + 0x28) as *mut u32;
         unsafe { *pinOutputClear = 0; }
 
-        let mut pinOutputSet = (GPIO_REGISTER_OFFSET + 0x1C) as *mut u32;
+        let mut pinOutputSet = (BCM2709_PERI_BASE+GPIO_REGISTER_OFFSET + 0x1C) as *mut u32;
         unsafe { *pinOutputSet = *pinOutputSet & *bitmask }
     }
 
