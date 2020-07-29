@@ -583,7 +583,7 @@ impl Image {
 
                 let extra_width_single = if count_width < (extra_width) / 2 {
                     1
-                } else { if count_width > (rescaledImage.width - ((extra_width) / 2)) { 1 } else { 0 } };
+                } else { if count_width > (rescaled_image.width - ((extra_width) / 2)) { 1 } else { 0 } };
 
                 for x in 0..rescaled_image.height {
                     let extra_height_single = if count_height < extra_height { 1 } else { 0 };
@@ -591,7 +591,7 @@ impl Image {
                     let mut g: u64 = 0;
                     let mut b: u64 = 0;
                     let mut total_number_of_pixels = 0;
-                    for i in 0..(widthInterval + extra_width_single) {
+                    for i in 0..(width_interval + extra_width_single) {
                         for j in 0..(pixels + extra_height_single) {
                             total_number_of_pixels += 1;
                             r += self.pixels[x * pixels + j + cmp::min(count_height, extra_height)][y * width_interval + i+cmp::min(extra_uses_width as usize, extra_width as usize)].r as u64;
