@@ -538,16 +538,16 @@ impl Image {
         for y in 0..rescaledImage.width {
             for x in 0..rescaledImage.height {
                 let extra = if count < extrapixels { 1 } else { 0 };
-                let mut r = 0;
-                let mut g = 0;
-                let mut b = 0;
+                let mut r: u64 = 0;
+                let mut g: u64 = 0;
+                let mut b: u64 = 0;
                 let mut totalNumberOfPixels = 0;
                 for i in 0..widthInterval {
                     for j in 0..(pixels + extra) {
                         totalNumberOfPixels += 1;
-                        r += self.pixels[x * pixels + j + cmp::min(count, extrapixels)][y * widthInterval + i].r;
-                        g += self.pixels[x * pixels + j + cmp::min(count, extrapixels)][y * widthInterval + i].g;
-                        b += self.pixels[x * pixels + j + cmp::min(count, extrapixels)][y * widthInterval + i].b;
+                        r += self.pixels[x * pixels + j + cmp::min(count, extrapixels)][y * widthInterval + i].r as u64;
+                        g += self.pixels[x * pixels + j + cmp::min(count, extrapixels)][y * widthInterval + i].g as u64;
+                        b += self.pixels[x * pixels + j + cmp::min(count, extrapixels)][y * widthInterval + i].b as u64;
                     }
                 }
                 r = r / totalNumberOfPixels;
@@ -555,9 +555,9 @@ impl Image {
                 b = b / totalNumberOfPixels;
 
                 rescaledImage.pixels[x][y] = Pixel {
-                    r: r,
-                    g: g,
-                    b: b,
+                    r: r as u16,
+                    g: g as u16,
+                    b: b as u16,
                 };
                 count += 1;
             }
