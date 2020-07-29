@@ -210,9 +210,9 @@ impl GPIO {
     fn activatePins(self: &mut GPIO, bitmask: &mut u32) {
         println!("{:#034b},set", unsafe { *bitmask });
         let mut pinOutputSet = self.gpio_set_bits_;
-        println!("{:#034b},set", unsafe {  *pinOutputSet & *bitmask });
+        println!("{:#034b},set", unsafe { *pinOutputSet & *bitmask });
 
-        unsafe { *pinOutputSet =  *bitmask; }
+        unsafe { *pinOutputSet = *bitmask; }
     }
     fn clearPins(self: &mut GPIO, bitmask: &mut u32) {
         let mut pinOutputClear = self.gpio_clr_bits_;
@@ -263,7 +263,7 @@ impl GPIO {
         println!("{:#034b},read oe1", unsafe { *self.gpio_read_bits_ });
 
         self.activatePins((&mut ((GPIO_BIT!(PIN_B)) as u32)));
-        thread::sleep(Duration::new(0, 1000000*500));
+        thread::sleep(Duration::new(0, 1000000 * 500));
 
         println!("{:#034b},read oe2", unsafe { *self.gpio_read_bits_ });
 
@@ -273,7 +273,7 @@ impl GPIO {
 
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
         // println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
-        thread::sleep(Duration::new(0, 1000000*10));
+        thread::sleep(Duration::new(0, 1000000 * 10));
         self.activatePins(&mut (GPIO_BIT!(PIN_OE) as u32));
         //     println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
 
@@ -543,8 +543,12 @@ pub fn main() {
         Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
     };
 
+    println!("{}", image.height);
+    println!("{}", image.pixels.len());
+    println!("{}", unsafe { image.pixels.get_unchecked(0) }.len());//todo fix
     let mut GPIO = GPIO::new(500);
     let mut timer = Timer::new();
+
 
 // This code sets up a CTRL-C handler that writes "true" to the
 // interrupt_received bool.
