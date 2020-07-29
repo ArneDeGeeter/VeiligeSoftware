@@ -241,12 +241,7 @@ impl GPIO {
         self.activatePins(&mut ((GPIO_BIT!(PIN_OE)) as u32));
     }
     fn showImage(self: &mut GPIO, image: &Image) {
-        let interrupt_received = Arc::new(AtomicBool::new(false));
-        let int_recv = interrupt_received.clone();
-        ctrlc::set_handler(move || {
-            int_recv.store(true, Ordering::SeqCst);
-        }).unwrap();
-        while interrupt_received.load(Ordering::SeqCst) == false {
+        loop {
             for x in 0usize..8 {
                 let rowMask = match x {
                     1 => GPIO_BIT!(PIN_A),
