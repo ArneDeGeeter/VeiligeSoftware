@@ -562,59 +562,37 @@ impl Image {
                 count += 1;
             }
         }
-        show_image(&rescaledImage);
-        rescaledImage
-    }
-}
-fn show_image(image: &Image) {
-    let sdl = sdl2::init().unwrap();
-    let video_subsystem = sdl.video().unwrap();
-    let display_mode = video_subsystem.current_display_mode(0).unwrap();
-
-    let w = match display_mode.w as u32 > image.width as u32 {
-        true => image.width,
-        false => display_mode.w as u32
-    };
-    let h = match display_mode.h as u32 > image.height as u32 {
-        true => image.height,
-        false => display_mode.h as u32
-    };
-
-    let window = video_subsystem
-        .window("Image", w, h)
-        .build()
-        .unwrap();
-    let mut canvas = window
-        .into_canvas()
-        .present_vsync()
-        .build()
-        .unwrap();
-    let black = sdl2::pixels::Color::RGB(0, 0, 0);
-
-    let mut event_pump = sdl.event_pump().unwrap();
-
-    // render image
-    canvas.set_draw_color(black);
-    canvas.clear();
-
-    for r in 0..image.height {
-        for c in 0..image.width {
-            let pixel = &image.pixels[r as usize][c as usize];
-            canvas.set_draw_color(Color::RGB(pixel.r as u8, pixel.g as u8, pixel.b as u8));
-            canvas.fill_rect(Rect::new(c as i32, r as i32, 1, 1)).unwrap();
-        }
-    }
-
-    canvas.present();
-
-    'main: loop {
-        for event in event_pump.poll_iter() {
-            match event {
-                sdl2::event::Event::Quit { .. } => break 'main,
-                _ => {}
+        for y in 0..rescaledImage.width {
+            for x in 0..rescaledImage.height {
+                print!("{} ", { rescaledImage.pixels[x][y].r })
             }
+            println!();
         }
-        sleep(Duration::new(0, 250000000));
+        println!();
+        println!();
+        println!();
+
+        for y in 0..rescaledImage.width {
+            for x in 0..rescaledImage.height {
+                print!("{} ", { rescaledImage.pixels[x][y].g })
+            }
+            println!();
+        }
+        println!();
+        println!();
+        println!();
+
+        for y in 0..rescaledImage.width {
+            for x in 0..rescaledImage.height {
+                print!("{} ", { rescaledImage.pixels[x][y].b })
+            }
+            println!();
+        }
+        println!();
+        println!();
+        println!();
+
+        rescaledImage
     }
 }
 
@@ -637,33 +615,33 @@ pub fn main() {
         Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
     };
     image.rescale();
-   /* println!("{}", image.height);
-    println!("{}", image.pixels.len());
-    println!("{}", unsafe { image.pixels.get_unchecked(0) }.len());//todo fix
+    /* println!("{}", image.height);
+     println!("{}", image.pixels.len());
+     println!("{}", unsafe { image.pixels.get_unchecked(0) }.len());//todo fix
 
-    let mut GPIO = GPIO::new(500);
-    let mut timer = Timer::new();
+     let mut GPIO = GPIO::new(500);
+     let mut timer = Timer::new();
 
 
-// This code sets up a CTRL-C handler that writes "true" to the
-// interrupt_received bool.
-    let int_recv = interrupt_received.clone();
-    ctrlc::set_handler(move || {
-        int_recv.store(true, Ordering::SeqCst);
-    }).unwrap();
-    GPIO.init_outputs(0);
-    while interrupt_received.load(Ordering::SeqCst) == false {
-        GPIO.set_bits(0, Vec::new());
+ // This code sets up a CTRL-C handler that writes "true" to the
+ // interrupt_received bool.
+     let int_recv = interrupt_received.clone();
+     ctrlc::set_handler(move || {
+         int_recv.store(true, Ordering::SeqCst);
+     }).unwrap();
+     GPIO.init_outputs(0);
+     while interrupt_received.load(Ordering::SeqCst) == false {
+         GPIO.set_bits(0, Vec::new());
 
-// TODO: Implement your rendering loop here
-    }
-    println!("Exiting.");
-    if interrupt_received.load(Ordering::SeqCst) == true {
-        GPIO.shutdown();
-        println!("Received CTRL-C");
-    } else {
-        println!("Timeout reached");
-    }*/
+ // TODO: Implement your rendering loop here
+     }
+     println!("Exiting.");
+     if interrupt_received.load(Ordering::SeqCst) == true {
+         GPIO.shutdown();
+         println!("Received CTRL-C");
+     } else {
+         println!("Timeout reached");
+     }*/
 
 // TODO: You may want to reset the board here (i.e., disable all LEDs)
 }
