@@ -277,6 +277,7 @@ impl GPIO {
     fn set_bits(self: &mut GPIO, rowMask: u32, image: &Image, rowNumber: usize, start: usize, framenumber: u16) {
         // self.clearAllPins();
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
+        println!(framenumber);
         let framemask: u16 = 1 << framenumber;
         for c in (start)..(32 + start) {
             self.clearAllPins();
