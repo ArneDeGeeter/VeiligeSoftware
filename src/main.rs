@@ -428,7 +428,7 @@ impl Frame {}
 
 //First implementation of BMP parser
 pub fn read_bmp() -> Result<Image, std::io::Error> { // {
-    let img = bmp::open("dog.bmp").unwrap_or_else(|e| {
+    let img = bmp::open("android-512.bmp").unwrap_or_else(|e| {
         panic!("Failed to open: {}", e);
     });
     let mut image = Image {
