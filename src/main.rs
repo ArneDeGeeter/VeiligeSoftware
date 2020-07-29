@@ -107,8 +107,8 @@ macro_rules! GPIO_BIT {
         1 << $bit
     };
 }
-macro_rules! currenttimemillis {
-    ()=>{SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_millis()};
+macro_rules! currenttimemicros {
+    ()=>{SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_micros()};
 }
 
 // Use this bitmask for sanity checks
@@ -245,35 +245,43 @@ impl GPIO {
     }
     fn showImage(self: &mut GPIO, image: &Image) {
         for i in 0..image.width {
-            let mut lasttime = currenttimemillis!();
-            while currenttimemillis!() < (lasttime + 150) {
-                currenttimemillis!();
+            let mut lasttime = currenttimemicros!();
+            let mut timerinterval = 100;
+            let mut framenumber = 0;
+            while currenttimemicros!() < (lasttime + 128000) {
+                framenumber = framenumber % 8;
+                timerinterval = (100 * (2 ^ framenumber)) as u128;
 
-                for x in 0usize..8 {
-                    let rowMask = match x {
-                        1 => GPIO_BIT!(PIN_A),
-                        2 => GPIO_BIT!(PIN_B),
-                        3 => GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_B),
-                        4 => GPIO_BIT!(PIN_C),
-                        5 => GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C),
-                        6 => GPIO_BIT!(PIN_B) | GPIO_BIT!(PIN_C),
-                        7 => GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_B) | GPIO_BIT!(PIN_C),
-                        _ => 0,
-                    };
-                    self.set_bits(rowMask as u32, image, x, i)
+                let mut lastframetime = currenttimemicros!();
+                while currenttimemicros!() < (lastframetime + timerinterval) {
+                    for x in 0usize..8 {
+                        let rowMask = match x {
+                            1 => GPIO_BIT!(PIN_A),
+                            2 => GPIO_BIT!(PIN_B),
+                            3 => GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_B),
+                            4 => GPIO_BIT!(PIN_C),
+                            5 => GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C),
+                            6 => GPIO_BIT!(PIN_B) | GPIO_BIT!(PIN_C),
+                            7 => GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_B) | GPIO_BIT!(PIN_C),
+                            _ => 0,
+                        };
+                        self.set_bits(rowMask as u32, image, x, i, framenumber)
+                    }
+                    framenumber += 1;
                 }
             }
         }
     }
 
 
-    fn set_bits(self: &mut GPIO, rowMask: u32, image: &Image, rowNumber: usize, start: usize) {
+    fn set_bits(self: &mut GPIO, rowMask: u32, image: &Image, rowNumber: usize, start: usize, framenumber: u16) {
         // self.clearAllPins();
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
+        let framemask: u16 = 1 << framenumber;
         for c in (start)..(32 + start) {
             self.clearAllPins();
-            let rgbmask1: u32 = (if image.pixels[rowNumber][c % image.width].r >= 128 { GPIO_BIT!({PIN_R1}) } else { 0 } | if image.pixels[rowNumber][c % image.width].g >= 128 { GPIO_BIT!({PIN_G1}) } else { 0 } | if image.pixels[rowNumber][c % image.width].b >= 128 { GPIO_BIT!({PIN_B1}) } else { 0 }) as u32;
-            let rgbmask2: u32 = (if image.pixels[rowNumber + 8][c % image.width].r >= 128 { GPIO_BIT!({PIN_R2}) } else { 0 } | if image.pixels[rowNumber + 8][c % image.width].g >= 128 { GPIO_BIT!({PIN_G2}) } else { 0 } | if image.pixels[rowNumber + 8][c % image.width].b >= 128 { GPIO_BIT!({PIN_B2}) } else { 0 }) as u32;
+            let rgbmask1: u32 = (if (image.pixels[rowNumber][c % image.width].r & framemask) != 0 { GPIO_BIT!({PIN_R1}) } else { 0 } | if (image.pixels[rowNumber][c % image.width].g & framemask) != 0 { GPIO_BIT!({PIN_G1}) } else { 0 } | if (image.pixels[rowNumber][c % image.width].b & framemask) != 0 { GPIO_BIT!({PIN_B1}) } else { 0 }) as u32;
+            let rgbmask2: u32 = (if (image.pixels[rowNumber + 8][c % image.width].r & framemask) != 0 { GPIO_BIT!({PIN_R2}) } else { 0 } | if (image.pixels[rowNumber + 8][c % image.width].g & framemask) != 0 { GPIO_BIT!({PIN_G2}) } else { 0 } | if (image.pixels[rowNumber + 8][c % image.width].b & framemask) != 0 { GPIO_BIT!({PIN_B2}) } else { 0 }) as u32;
             let rgbmask: u32 = rgbmask1 | rgbmask2;
             self.activatePins(&rgbmask);
 
