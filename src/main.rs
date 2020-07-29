@@ -208,12 +208,12 @@ impl GPIO {
         // TODO: Implement this yourself. Note: this function expects          a bitmask as the @outputs argument
     }
 
-    fn activatePins(self: &mut GPIO, bitmask: &mut u32) {
+    fn activatePins(self: &mut GPIO, bitmask: &u32) {
         let mut pinOutputSet = self.gpio_set_bits_;
 
         unsafe { *pinOutputSet = *bitmask; }
     }
-    fn clearPins(self: &mut GPIO, bitmask: &mut u32) {
+    fn clearPins(self: &mut GPIO, bitmask: &u32) {
         let mut pinOutputClear = self.gpio_clr_bits_;
 
         unsafe { *pinOutputClear = *bitmask; }
@@ -223,7 +223,7 @@ impl GPIO {
 
         unsafe { *pinOutputClear = ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_R2) | GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2) | GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2)) as u32); }
     }
-    fn clearAllPinsAndActivate(self: &mut GPIO, bitmask: &mut u32) {
+    fn clearAllPinsAndActivate(self: &mut GPIO, bitmask: &u32) {
         self.clearAllPins();
         let mut pinOutputSet = self.gpio_set_bits_;
         unsafe { *pinOutputSet = *bitmask }
@@ -240,17 +240,32 @@ impl GPIO {
 
         self.activatePins(&mut ((GPIO_BIT!(PIN_OE)) as u32));
     }
-    fn set_bits(self: &mut GPIO, row: u32, lineVec: Vec<Pixel>) {
+    fn showImage(self: &mut GPIO, image: &Image) {
+        while interrupt_received.load(Ordering::SeqCst) == false {
+            for x in 0..8 {
+                let rowMask = match x {
+                    1 => GPIO_BIT!(A),
+                    2 => GPIO_BIT!(B),
+                    3 => GPIO_BIT!(A) | GPIO_BIT!(B),
+                    4 => GPIO_BIT!(C),
+                    5 => GPIO_BIT!(A) | GPIO_BIT!(C),
+                    6 => GPIO_BIT!(B) | GPIO_BIT!(C),
+                    7 => GPIO_BIT!(A) | GPIO_BIT!(B) | GPIO_BIT!(C),
+                    _ => 0,
+                };
+                self.set_bits(rowMask, image, x)
+            }
+        }
+    }
+    fn set_bits(self: &mut GPIO, rowMask: u32, image: &Image, rowNumber: i32) {
         // self.clearAllPins();
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
         for c in 0..32 {
-            if (c % 2 == 1) {
-                self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_R1)|GPIO_BIT!(PIN_B)) as u32));
-                // self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2)) as u32));
-            } else {
-                self.clearAllPins();
-                // self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_R2)) as u32));
-            }
+            self.clearAllPins();
+            let rgbmask1: u32 = (if image.pixels[rowNumber][c].r >= 128 { GPIO_BIT!({PIN_R1}) } else { 0 } | if image.pixels[rowNumber][c].g >= 128 { GPIO_BIT!({PIN_G1}) } else { 0 } | if image.pixels[rowNumber][c].b >= 128 { GPIO_BIT!({PIN_B1}) } else { 0 }) as u32;
+            let rgbmask2: u32 = (if image.pixels[rowNumber + 8][c].r >= 128 { GPIO_BIT!({PIN_R2}) } else { 0 } | if image.pixels[rowNumber + 8][c].g >= 128 { GPIO_BIT!({PIN_G2}) } else { 0 } | if image.pixels[rowNumber + 8][c].b >= 128 { GPIO_BIT!({PIN_B2}) } else { 0 }) as u32;
+            let rgbmask: u32 = rgbmask1 | rgbmask2;
+            self.activatePins(&rgbmask);
 
             self.activatePins(&mut (GPIO_BIT!(PIN_CLK) as u32));
             self.clearPins(&mut (GPIO_BIT!(PIN_CLK) as u32));
@@ -258,9 +273,9 @@ impl GPIO {
 
 
         self.clearPins(&mut ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_R2) | GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2) | GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2)) as u32));
-       self.clearPins(&mut ((GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C) | GPIO_BIT!(PIN_B) | GPIO_BIT!(PIN_D) | GPIO_BIT!(PIN_E)) as u32));
+        self.clearPins(&mut ((GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C) | GPIO_BIT!(PIN_B) | GPIO_BIT!(PIN_D) | GPIO_BIT!(PIN_E)) as u32));
 
-        self.activatePins((&mut ((GPIO_BIT!(PIN_B)) as u32)));
+        self.activatePins((&(rowMask)));
 //        thread::sleep(Duration::new(0, 1000000 * 500));
 
 
@@ -583,34 +598,34 @@ pub fn main() {
         Ok(img) => img,
         Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
     };
-    image.rescale();
-     println!("{}", image.height);
-     println!("{}", image.pixels.len());
-     println!("{}", unsafe { image.pixels.get_unchecked(0) }.len());//todo fix
+    let rescaledImage = image.rescale();
+    println!("{}", image.height);
+    println!("{}", image.pixels.len());
+    println!("{}", unsafe { image.pixels.get_unchecked(0) }.len());//todo fix
 
-     let mut GPIO = GPIO::new(500);
-     let mut timer = Timer::new();
+    let mut GPIO = GPIO::new(500);
+    let mut timer = Timer::new();
 
 
- // This code sets up a CTRL-C handler that writes "true" to the
- // interrupt_received bool.
-     let int_recv = interrupt_received.clone();
-     ctrlc::set_handler(move || {
-         int_recv.store(true, Ordering::SeqCst);
-     }).unwrap();
-     GPIO.init_outputs(0);
-     while interrupt_received.load(Ordering::SeqCst) == false {
-         GPIO.set_bits(0, Vec::new());
+    // This code sets up a CTRL-C handler that writes "true" to the
+    // interrupt_received bool.
+    let int_recv = interrupt_received.clone();
+    ctrlc::set_handler(move || {
+        int_recv.store(true, Ordering::SeqCst);
+    }).unwrap();
+    GPIO.init_outputs(0);
+    while interrupt_received.load(Ordering::SeqCst) == false {
+        GPIO.showImage(&rescaledImage);
 
- // TODO: Implement your rendering loop here
-     }
-     println!("Exiting.");
-     if interrupt_received.load(Ordering::SeqCst) == true {
-         GPIO.shutdown();
-         println!("Received CTRL-C");
-     } else {
-         println!("Timeout reached");
-     }
+        // TODO: Implement your rendering loop here
+    }
+    println!("Exiting.");
+    if interrupt_received.load(Ordering::SeqCst) == true {
+        GPIO.shutdown();
+        println!("Received CTRL-C");
+    } else {
+        println!("Timeout reached");
+    }
 
 // TODO: You may want to reset the board here (i.e., disable all LEDs)
 }
