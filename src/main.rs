@@ -244,16 +244,16 @@ impl GPIO {
         while interrupt_received.load(Ordering::SeqCst) == false {
             for x in 0usize..8 {
                 let rowMask = match x {
-                    1 => GPIO_BIT!(A),
-                    2 => GPIO_BIT!(B),
-                    3 => GPIO_BIT!(A) | GPIO_BIT!(B),
-                    4 => GPIO_BIT!(C),
-                    5 => GPIO_BIT!(A) | GPIO_BIT!(C),
-                    6 => GPIO_BIT!(B) | GPIO_BIT!(C),
-                    7 => GPIO_BIT!(A) | GPIO_BIT!(B) | GPIO_BIT!(C),
+                    1 => GPIO_BIT!(PIN_A),
+                    2 => GPIO_BIT!(PIN_B),
+                    3 => GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_B),
+                    4 => GPIO_BIT!(PIN_C),
+                    5 => GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C),
+                    6 => GPIO_BIT!(PIN_B) | GPIO_BIT!(PIN_C),
+                    7 => GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_B) | GPIO_BIT!(PIN_C),
                     _ => 0,
                 };
-                self.set_bits(rowMask, image, x)
+                self.set_bits(rowMask as u32, image, x)
             }
         }
     }
