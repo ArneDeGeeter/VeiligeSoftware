@@ -246,7 +246,7 @@ impl GPIO {
     fn showImage(self: &mut GPIO, image: &Image) {
         for i in 0..image.width {
             let mut lasttime = currenttimemillis!();
-            while currenttimemillis!() < (lasttime + 1) {
+            while currenttimemillis!() < (lasttime + 150) {
                 currenttimemillis!();
 
                 for x in 0usize..8 {
