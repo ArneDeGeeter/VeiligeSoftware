@@ -286,7 +286,7 @@ impl GPIO {
 
         self.clearPins(&mut (GPIO_BIT!(PIN_LAT) as u32));
 
-        //self.activatePins(&mut (GPIO_BIT!(PIN_OE) as u32));
+        self.activatePins(&mut (GPIO_BIT!(PIN_OE) as u32));
 
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
         // println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
