@@ -209,9 +209,7 @@ impl GPIO {
     }
 
     fn activatePins(self: &mut GPIO, bitmask: &mut u32) {
-        println!("{:#034b},set", unsafe { *bitmask });
         let mut pinOutputSet = self.gpio_set_bits_;
-        println!("{:#034b},set", unsafe { *pinOutputSet & *bitmask });
 
         unsafe { *pinOutputSet = *bitmask; }
     }
@@ -261,12 +259,10 @@ impl GPIO {
 
         self.clearPins(&mut ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_R2) | GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2) | GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2)) as u32));
       //  self.clearPins(&mut ((GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C) | GPIO_BIT!(PIN_B) | GPIO_BIT!(PIN_D) | GPIO_BIT!(PIN_E)) as u32));
-        println!("{:#034b},read oe1", unsafe { *self.gpio_read_bits_ });
 
       //  self.activatePins((&mut ((GPIO_BIT!(PIN_B)) as u32)));
-        thread::sleep(Duration::new(0, 1000000 * 500));
+//        thread::sleep(Duration::new(0, 1000000 * 500));
 
-        println!("{:#034b},read oe2", unsafe { *self.gpio_read_bits_ });
 
         self.activatePins(&mut (GPIO_BIT!(PIN_LAT) as u32));
 
