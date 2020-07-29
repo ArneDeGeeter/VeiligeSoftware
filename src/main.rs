@@ -426,7 +426,7 @@ impl Frame {}
 
 //First implementation of BMP parser
 pub fn read_bmp() -> Result<Image, std::io::Error> { // {
-    let img = bmp::open("android-5.bmp").unwrap_or_else(|e| {
+    let img = bmp::open("dog.bmp").unwrap_or_else(|e| {
         panic!("Failed to open: {}", e);
     });
     let mut image = Image {
@@ -561,48 +561,50 @@ pub fn read_ppm() -> Result<Image, std::io::Error> {
 
 impl Image {
     fn rescale(self: &Image) -> Image {
-        let mut rescaledImage = Image {
-            width: self.width * 16 / self.height,
-            height: 16,
-            pixels: vec![],
-        };
-        rescaledImage.pixels = vec![vec![Pixel { r: 0, g: 0, b: 0 }; rescaledImage.width as usize]; rescaledImage.height as usize];
-        let pixels = (self.height / 16);
-        let extrapixels = (self.height % 16);
-        let mut count = 0;
+        if self.height > 16 {
+            let mut rescaledImage = Image {
+                width: self.width * 16 / self.height,
+                height: 16,
+                pixels: vec![],
+            };
+            rescaledImage.pixels = vec![vec![Pixel { r: 0, g: 0, b: 0 }; rescaledImage.width as usize]; rescaledImage.height as usize];
+            let pixels = (self.height / 16);
+            let extrapixels = (self.height % 16);
+            let mut count = 0;
 
 //self.width/(resised.width)
-        let widthInterval = self.height / 16;
+            let widthInterval = self.height / 16;
 
-        for y in 0..rescaledImage.width {
-            for x in 0..rescaledImage.height {
-                let extra = if count < extrapixels { 1 } else { 0 };
-                let mut r: u64 = 0;
-                let mut g: u64 = 0;
-                let mut b: u64 = 0;
-                let mut totalNumberOfPixels = 0;
-                for i in 0..widthInterval {
-                    for j in 0..(pixels + extra) {
-                        totalNumberOfPixels += 1;
-                        r += self.pixels[x * pixels + j + cmp::min(count, extrapixels)][y * widthInterval + i].r as u64;
-                        g += self.pixels[x * pixels + j + cmp::min(count, extrapixels)][y * widthInterval + i].g as u64;
-                        b += self.pixels[x * pixels + j + cmp::min(count, extrapixels)][y * widthInterval + i].b as u64;
+            for y in 0..rescaledImage.width {
+                for x in 0..rescaledImage.height {
+                    let extra = if count < extrapixels { 1 } else { 0 };
+                    let mut r: u64 = 0;
+                    let mut g: u64 = 0;
+                    let mut b: u64 = 0;
+                    let mut totalNumberOfPixels = 0;
+                    for i in 0..widthInterval {
+                        for j in 0..(pixels + extra) {
+                            totalNumberOfPixels += 1;
+                            r += self.pixels[x * pixels + j + cmp::min(count, extrapixels)][y * widthInterval + i].r as u64;
+                            g += self.pixels[x * pixels + j + cmp::min(count, extrapixels)][y * widthInterval + i].g as u64;
+                            b += self.pixels[x * pixels + j + cmp::min(count, extrapixels)][y * widthInterval + i].b as u64;
+                        }
                     }
+                    r = r / totalNumberOfPixels;
+                    g = g / totalNumberOfPixels;
+                    b = b / totalNumberOfPixels;
+
+                    rescaledImage.pixels[x][y] = Pixel {
+                        r: r as u16,
+                        g: g as u16,
+                        b: b as u16,
+                    };
+                    count += 1;
                 }
-                r = r / totalNumberOfPixels;
-                g = g / totalNumberOfPixels;
-                b = b / totalNumberOfPixels;
-
-                rescaledImage.pixels[x][y] = Pixel {
-                    r: r as u16,
-                    g: g as u16,
-                    b: b as u16,
-                };
-                count += 1;
             }
-        }
 
-        rescaledImage
+            rescaledImage
+        } else { self }
     }
 }
 
@@ -620,11 +622,12 @@ pub fn main() {
     }
 
 // TODO: Read the PPM file here. You can find its name in args[1]
+
     let image = read_bmp().unwrap();
-    /* let image = match read_ppm() {
-         Ok(img) => img,
-         Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
-     };*/
+    // let image = match read_ppm() {
+    //     Ok(img) => img,
+    //     Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
+    // };
     let rescaledImage = image.rescale();
     println!("{}", image.height);
     println!("{}", image.pixels.len());
