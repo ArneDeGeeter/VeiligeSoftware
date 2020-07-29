@@ -426,7 +426,7 @@ impl Frame {}
 
 //First implementation of BMP parser
 pub fn read_bmp() -> Result<Image, std::io::Error> { // {
-    let img = bmp::open("icons8-jake-4.bmp").unwrap_or_else(|e| {
+    let img = bmp::open("android-5.bmp").unwrap_or_else(|e| {
         panic!("Failed to open: {}", e);
     });
     let mut image = Image {
@@ -648,11 +648,11 @@ pub fn main() {
 
 // TODO: Read the PPM file here. You can find its name in args[1]
 
-    // let image = read_bmp().unwrap();
-    let image = match read_ppm() {
-        Ok(img) => img,
-        Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
-    };
+    let image = read_bmp().unwrap();
+    // let image = match read_ppm() {
+    //     Ok(img) => img,
+    //     Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
+    // };
     let rescaled_image = image.rescale();
     println!("{}", image.height);
     println!("{}", image.pixels.len());
