@@ -246,7 +246,7 @@ impl GPIO {
     fn showImage(self: &mut GPIO, image: &Image) {
         for i in 0..image.width {
             let mut lasttime = currenttimemicros!();
-            let mut timerinterval =1000;
+            let mut timerinterval = 1000;
             let mut framenumber = 0;
             while currenttimemicros!() < (lasttime + 128000) {
                 framenumber = framenumber % 8;
@@ -267,8 +267,10 @@ impl GPIO {
                         };
                         self.set_bits(rowMask as u32, image, x, i, framenumber)
                     }
-                    framenumber += 1;
                 }
+
+                println!("{}frame", framenumber);
+                framenumber += 1;
             }
         }
     }
@@ -277,7 +279,6 @@ impl GPIO {
     fn set_bits(self: &mut GPIO, rowMask: u32, image: &Image, rowNumber: usize, start: usize, framenumber: u16) {
         // self.clearAllPins();
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
-        println!("{}frame",framenumber);
         let framemask: u16 = 1 << framenumber;
         for c in (start)..(32 + start) {
             self.clearAllPins();
