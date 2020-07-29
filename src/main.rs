@@ -604,7 +604,7 @@ impl Image {
             }
 
             rescaledImage
-        } else { self }
+        } else { &self }
     }
 }
 
