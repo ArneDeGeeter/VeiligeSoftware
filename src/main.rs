@@ -3,7 +3,7 @@
 // _Please_ read them carefully. They are very important.
 // The most important comments are all annotated with "NOTE/WARNING:"
 
-// I will grade your code quality primarily on how "idiomatic" your Rust 
+// I will grade your code quality primarily on how "idiomatic" your Rust
 // code is, and how well you implemented the "safe unsafety" guidelines.
 
 extern crate libc;
@@ -107,7 +107,7 @@ macro_rules! GPIO_BIT {
         1 << $bit
     };
 }
-macro_rules! currenttimemicros {
+macro_rules! current_time_micros {
     ()=>{SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_micros()};
 }
 
@@ -151,15 +151,15 @@ fn mmap_bcm_register(register_offset: usize) -> Option<MemoryMap> {
         false => Some(result)
     };
 
-    // NOTE/WARNING: When a MemoryMap struct is dropped, the mapped 
+    // NOTE/WARNING: When a MemoryMap struct is dropped, the mapped
     // memory region is automatically unmapped!
 }
 
 //
-// NOTE/WARNING: In many cases, particularly those where you need to set or clear 
-// multiple bits at once, it is convenient to store multiple pin numbers in one bit 
-// mask value. If you want to simultaneously set PIN_A and PIN_C to high, for example, 
-// you should probably create a bit mask with the positions of PIN_A and PIN_C set to 1, 
+// NOTE/WARNING: In many cases, particularly those where you need to set or clear
+// multiple bits at once, it is convenient to store multiple pin numbers in one bit
+// mask value. If you want to simultaneously set PIN_A and PIN_C to high, for example,
+// you should probably create a bit mask with the positions of PIN_A and PIN_C set to 1,
 // and all other positions set to 0. You can do this using the GPIO_BIT! macro.
 //
 // In this example, you would do something like:
@@ -168,10 +168,10 @@ fn mmap_bcm_register(register_offset: usize) -> Option<MemoryMap> {
 //
 impl GPIO {
     //
-    // configures pin number @pin_num as an output pin by writing to the 
+    // configures pin number @pin_num as an output pin by writing to the
     // appropriate Function Select register (see section 2.1).
-    // 
-    // NOTE/WARNING: This method configures one pin at a time. The @pin_num argument 
+    //
+    // NOTE/WARNING: This method configures one pin at a time. The @pin_num argument
     // that is expected here is really a pin number and not a bitmask!
     //
     // Doing something like:
@@ -187,7 +187,7 @@ impl GPIO {
     fn configure_output_pin(self: &mut GPIO, pin_num: u64) {
         let register_num = (pin_num / 10) as isize;
         let register_ref = unsafe { self.gpio_port_.offset(register_num) };
-        // NOTE/WARNING: When reading from or writing to MMIO memory regions, you MUST 
+        // NOTE/WARNING: When reading from or writing to MMIO memory regions, you MUST
         // use the std::ptr::read_volatile and std::ptr::write_volatile functions
         let current_val = unsafe { std::ptr::read_volatile(register_ref) };
         println!("{:#034b},{}", current_val, pin_num);
@@ -200,7 +200,7 @@ impl GPIO {
         let new_val = (current_val & !(7 << ((pin_num % 10) * 3))) | (1 << ((pin_num % 10) * 3));
         println!("{},{}", new_val, pin_num);
 
-        // NOTE/WARNING: When reading from or writing to MMIO memory regions, you MUST 
+        // NOTE/WARNING: When reading from or writing to MMIO memory regions, you MUST
         // use the std::ptr::read_volatile and std::ptr::write_volatile functions
         unsafe { std::ptr::write_volatile(register_ref, new_val) };
     }
@@ -211,49 +211,49 @@ impl GPIO {
         // TODO: Implement this yourself. Note: this function expects          a bitmask as the @outputs argument
     }
 
-    fn activatePins(self: &mut GPIO, bitmask: &u32) {
-        let mut pinOutputSet = self.gpio_set_bits_;
+    fn activate_pins(self: &mut GPIO, bitmask: &u32) {
+        let mut pin_output_set = self.gpio_set_bits_;
 
-        unsafe { *pinOutputSet = *bitmask; }
+        unsafe { *pin_output_set = *bitmask; }
     }
-    fn clearPins(self: &mut GPIO, bitmask: &u32) {
-        let mut pinOutputClear = self.gpio_clr_bits_;
+    fn clear_pins(self: &mut GPIO, bitmask: &u32) {
+        let mut pin_output_clear = self.gpio_clr_bits_;
 
-        unsafe { *pinOutputClear = *bitmask; }
+        unsafe { *pin_output_clear = *bitmask; }
     }
-    fn clearAllPins(self: &mut GPIO) {
-        let mut pinOutputClear = self.gpio_clr_bits_;
+    fn clear_all_pins(self: &mut GPIO) {
+        let mut pin_output_clear = self.gpio_clr_bits_;
 
-        unsafe { *pinOutputClear = ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_R2) | GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2) | GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2)) as u32); }
+        unsafe { *pin_output_clear = ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_R2) | GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2) | GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2)) as u32); }
     }
-    fn clearAllPinsAndActivate(self: &mut GPIO, bitmask: &u32) {
-        self.clearAllPins();
-        let mut pinOutputSet = self.gpio_set_bits_;
-        unsafe { *pinOutputSet = *bitmask }
+    fn clear_all_pins_and_activate(self: &mut GPIO, bitmask: &u32) {
+        self.clear_all_pins();
+        let mut pin_output_set = self.gpio_set_bits_;
+        unsafe { *pin_output_set = *bitmask }
         // println!("{:#034b},set", unsafe { *pinOutputSet });
         // println!("{:#034b},clear", unsafe { *pinOutputClear });
         // println!("{:?},adr",self.gpio_read_bits_);
     }
     fn shutdown(self: &mut GPIO) {
-        self.clearAllPins();
-        self.activatePins(&mut (GPIO_BIT!(PIN_LAT) as u32));
+        self.clear_all_pins();
+        self.activate_pins(&mut (GPIO_BIT!(PIN_LAT) as u32));
 
-        self.clearPins(&mut (GPIO_BIT!(PIN_LAT) as u32));
+        self.clear_pins(&mut (GPIO_BIT!(PIN_LAT) as u32));
 
 
-        self.activatePins(&mut ((GPIO_BIT!(PIN_OE)) as u32));
+        self.activate_pins(&mut ((GPIO_BIT!(PIN_OE)) as u32));
     }
-    fn showImage(self: &mut GPIO, image: &Image) {
+    fn show_image(self: &mut GPIO, image: &Image) {
         for i in 0..image.width {
-            let mut lasttime = currenttimemicros!();
+            let mut lasttime = current_time_micros!();
             let mut timerinterval = 1;
             let mut framenumber = 0;
-            while currenttimemicros!() < (lasttime + 256000) {
+            while current_time_micros!() < (lasttime + 256000) {
                 framenumber = framenumber % 8;
                 timerinterval = (1 * (2 ^ framenumber)) as u128;
 
-                let mut lastframetime = currenttimemicros!();
-                while currenttimemicros!() < (lastframetime + timerinterval) {
+                let mut lastframetime = current_time_micros!();
+                while current_time_micros!() < (lastframetime + timerinterval) {
                     for x in 0usize..8 {
                         let rowMask = match x {
                             1 => GPIO_BIT!(PIN_A),
@@ -276,34 +276,34 @@ impl GPIO {
 
     fn set_bits(self: &mut GPIO, rowMask: u32, image: &Image, rowNumber: usize, start: usize, framenumber: u16) {
         // self.clearAllPins();
-        self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
+        self.clear_pins(&mut (GPIO_BIT!(PIN_OE) as u32));
         let framemask: u16 = 1 << framenumber;
         for c in (start)..(32 + start) {
-            self.clearAllPins();
+            self.clear_all_pins();
             let rgbmask1: u32 = (if (image.pixels[rowNumber][c % image.width].r & framemask) != 0 { GPIO_BIT!({PIN_R1}) } else { 0 } | if (image.pixels[rowNumber][c % image.width].g & framemask) != 0 { GPIO_BIT!({PIN_G1}) } else { 0 } | if (image.pixels[rowNumber][c % image.width].b & framemask) != 0 { GPIO_BIT!({PIN_B1}) } else { 0 }) as u32;
             let rgbmask2: u32 = (if (image.pixels[rowNumber + 8][c % image.width].r & framemask) != 0 { GPIO_BIT!({PIN_R2}) } else { 0 } | if (image.pixels[rowNumber + 8][c % image.width].g & framemask) != 0 { GPIO_BIT!({PIN_G2}) } else { 0 } | if (image.pixels[rowNumber + 8][c % image.width].b & framemask) != 0 { GPIO_BIT!({PIN_B2}) } else { 0 }) as u32;
             let rgbmask: u32 = rgbmask1 | rgbmask2;
-            self.activatePins(&rgbmask);
+            self.activate_pins(&rgbmask);
 
-            self.activatePins(&mut (GPIO_BIT!(PIN_CLK) as u32));
-            self.clearPins(&mut (GPIO_BIT!(PIN_CLK) as u32));
+            self.activate_pins(&mut (GPIO_BIT!(PIN_CLK) as u32));
+            self.clear_pins(&mut (GPIO_BIT!(PIN_CLK) as u32));
         }
 
 
-        self.clearPins(&mut ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_R2) | GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2) | GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2)) as u32));
-        self.clearPins(&mut ((GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C) | GPIO_BIT!(PIN_B) | GPIO_BIT!(PIN_D) | GPIO_BIT!(PIN_E)) as u32));
+        self.clear_pins(&mut ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_R2) | GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2) | GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2)) as u32));
+        self.clear_pins(&mut ((GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C) | GPIO_BIT!(PIN_B) | GPIO_BIT!(PIN_D) | GPIO_BIT!(PIN_E)) as u32));
 
-        self.activatePins((&(rowMask)));
+        self.activate_pins((&(rowMask)));
 //        thread::sleep(Duration::new(0, 1000000 * 500));
 
 
-        self.activatePins(&mut (GPIO_BIT!(PIN_LAT) as u32));
+        self.activate_pins(&mut (GPIO_BIT!(PIN_LAT) as u32));
 
-        self.clearPins(&mut (GPIO_BIT!(PIN_LAT) as u32));
+        self.clear_pins(&mut (GPIO_BIT!(PIN_LAT) as u32));
 
 
-        self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
-        self.activatePins(&mut (GPIO_BIT!(PIN_OE) as u32));
+        self.clear_pins(&mut (GPIO_BIT!(PIN_OE) as u32));
+        self.activate_pins(&mut (GPIO_BIT!(PIN_OE) as u32));
 
         // println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
         // thread::sleep(Duration::new(0, 1000000 * 10));
@@ -426,7 +426,7 @@ impl Frame {}
 
 //First implementation of BMP parser
 pub fn read_bmp() -> Result<Image, std::io::Error> { // {
-    let img = bmp::open("dog.bmp").unwrap_or_else(|e| {
+    let img = bmp::open("icons8-jake-4.bmp").unwrap_or_else(|e| {
         panic!("Failed to open: {}", e);
     });
     let mut image = Image {
@@ -638,7 +638,7 @@ pub fn main() {
     //     Ok(img) => img,
     //     Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
     // };
-    let rescaledImage = image.rescale();
+    let rescaled_image = image.rescale();
     println!("{}", image.height);
     println!("{}", image.pixels.len());
     println!("{}", unsafe { image.pixels.get_unchecked(0) }.len());//todo fix
@@ -655,7 +655,7 @@ pub fn main() {
     }).unwrap();
     GPIO.init_outputs(0);
     while interrupt_received.load(Ordering::SeqCst) == false {
-        GPIO.showImage(&rescaledImage);
+        GPIO.show_image(&rescaled_image);
 
 // TODO: Implement your rendering loop here
     }
