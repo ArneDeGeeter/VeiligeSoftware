@@ -268,8 +268,6 @@ impl GPIO {
                         self.set_bits(rowMask as u32, image, x, i, framenumber)
                     }
                 }
-
-                println!("{}frame", framenumber);
                 framenumber += 1;
             }
         }
@@ -428,7 +426,7 @@ impl Frame {}
 
 //First implementation of BMP parser
 pub fn read_bmp() -> Result<Image, std::io::Error> { // {
-    let img = bmp::open("icons8-jake-4.bmp").unwrap_or_else(|e| {
+    let img = bmp::open("android-5.bmp").unwrap_or_else(|e| {
         panic!("Failed to open: {}", e);
     });
     let mut image = Image {
