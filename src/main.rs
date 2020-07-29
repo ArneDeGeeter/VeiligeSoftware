@@ -256,6 +256,7 @@ impl GPIO {
                 self.set_bits(rowMask as u32, image, x, i)
             }
         }
+        thread::sleep(Duration::new(0, 1000000 * 1000));
     }
 
 
