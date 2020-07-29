@@ -618,10 +618,10 @@ impl Image {
                         g: g as u16,
                         b: b as u16,
                     };
+                    count_height += 1;
                 }
                 extra_uses_width += extra_width_single;
-
-                count_height += 1;
+                count_width += 1
             }
 
             rescaled_image
