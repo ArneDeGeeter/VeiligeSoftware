@@ -648,11 +648,11 @@ pub fn main() {
 
 // TODO: Read the PPM file here. You can find its name in args[1]
 
-    let image = read_bmp().unwrap();
-    // let image = match read_ppm() {
-    //     Ok(img) => img,
-    //     Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
-    // };
+    // let image = read_bmp().unwrap();
+    let image = match read_ppm() {
+        Ok(img) => img,
+        Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
+    };
     let rescaled_image = image.rescale();
     println!("{}", image.height);
     println!("{}", image.pixels.len());
