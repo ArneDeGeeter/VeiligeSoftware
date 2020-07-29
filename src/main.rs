@@ -599,7 +599,7 @@ impl Image {
                     for i in 0..(width_interval + extra_width_single) {
                         for j in 0..(pixels + extra_height_single) {
                             total_number_of_pixels += 1;
-                            println!("{} {} {}",y * widthInterval, i, cmp::min(extra_uses_width as usize, extra_width as usize));
+                            println!("{} {} {}",y * width_interval, i, cmp::min(extra_uses_width as usize, extra_width as usize));
 
                             r += self.pixels[x * pixels + j + cmp::min(count_height, extra_height)][y * width_interval + i+cmp::min(extra_uses_width as usize, extra_width as usize)].r as u64;
                             g += self.pixels[x * pixels + j + cmp::min(count_height, extra_height)][y * width_interval + i+cmp::min(extra_uses_width as usize, extra_width as usize)].g as u64;
