@@ -562,48 +562,59 @@ pub fn read_ppm() -> Result<Image, std::io::Error> {
 impl Image {
     fn rescale(self: &Image) -> Image {
         if self.height > 16 {
-            let mut rescaledImage = Image {
+            let mut rescaled_image = Image {
                 width: self.width * 16 / self.height,
                 height: 16,
                 pixels: vec![],
             };
-            rescaledImage.pixels = vec![vec![Pixel { r: 0, g: 0, b: 0 }; rescaledImage.width as usize]; rescaledImage.height as usize];
+            rescaled_image.pixels = vec![vec![Pixel { r: 0, g: 0, b: 0 }; rescaled_image.width as usize]; rescaled_image.height as usize];
             let pixels = (self.height / 16);
-            let extrapixels = (self.height % 16);
-            let mut count = 0;
+            let extra_height = (self.height % 16);
+            let mut count_height = 0;
 
 //self.width/(resised.width)
-            let widthInterval = self.height / 16;
+            let width_interval = self.height / 16;
+            let extra_width = (self.height % 16);
 
-            for y in 0..rescaledImage.width {
-                for x in 0..rescaledImage.height {
-                    let extra = if count < extrapixels { 1 } else { 0 };
+            let mut count_width = 0;
+            let mut extra_uses_width=0;
+            for y in 0..rescaled_image.width {
+                count_height =0;
+
+                let extra_width_single = if count_width < (extra_width) / 2 {
+                    1
+                } else { if count_width > (rescaledImage.width - ((extra_width) / 2)) { 1 } else { 0 } };
+
+                for x in 0..rescaled_image.height {
+                    let extra_height_single = if count_height < extra_height { 1 } else { 0 };
                     let mut r: u64 = 0;
                     let mut g: u64 = 0;
                     let mut b: u64 = 0;
-                    let mut totalNumberOfPixels = 0;
-                    for i in 0..widthInterval {
-                        for j in 0..(pixels + extra) {
-                            totalNumberOfPixels += 1;
-                            r += self.pixels[x * pixels + j + cmp::min(count, extrapixels)][y * widthInterval + i].r as u64;
-                            g += self.pixels[x * pixels + j + cmp::min(count, extrapixels)][y * widthInterval + i].g as u64;
-                            b += self.pixels[x * pixels + j + cmp::min(count, extrapixels)][y * widthInterval + i].b as u64;
+                    let mut total_number_of_pixels = 0;
+                    for i in 0..(widthInterval + extra_width_single) {
+                        for j in 0..(pixels + extra_height_single) {
+                            total_number_of_pixels += 1;
+                            r += self.pixels[x * pixels + j + cmp::min(count_height, extra_height)][y * width_interval + i+cmp::min(extra_uses_width as usize, extra_width as usize)].r as u64;
+                            g += self.pixels[x * pixels + j + cmp::min(count_height, extra_height)][y * width_interval + i+cmp::min(extra_uses_width as usize, extra_width as usize)].g as u64;
+                            b += self.pixels[x * pixels + j + cmp::min(count_height, extra_height)][y * width_interval + i+cmp::min(extra_uses_width as usize, extra_width as usize)].b as u64;
                         }
                     }
-                    r = r / totalNumberOfPixels;
-                    g = g / totalNumberOfPixels;
-                    b = b / totalNumberOfPixels;
+                    r = r / total_number_of_pixels;
+                    g = g / total_number_of_pixels;
+                    b = b / total_number_of_pixels;
 
-                    rescaledImage.pixels[x][y] = Pixel {
+                    rescaled_image.pixels[x][y] = Pixel {
                         r: r as u16,
                         g: g as u16,
                         b: b as u16,
                     };
-                    count += 1;
+                    extra_uses_width+=extra_width_single;
+
+                    count_height += 1;
                 }
             }
 
-            rescaledImage
+            rescaled_image
         } else {
             //Don't judge
             let mut img = Image { width: self.width, height: self.height, pixels: vec![] };
