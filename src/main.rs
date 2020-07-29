@@ -431,11 +431,6 @@ pub fn read_bmp() -> Result<Image, std::io::Error> { // {
     let img = bmp::open("dog.bmp").unwrap_or_else(|e| {
         panic!("Failed to open: {}", e);
     });
-    for (x, y) in img.coordinates() {
-        let px = img.get_pixel(x, y);
-        println!("X: {}, y: {} \n", x, y);
-        println!("R: {}, G: {}, B: {} \n", px.r, px.g, px.b);
-    };
     let mut image = Image {
         width: img.get_width() as usize,
         height: img.get_height() as usize,
