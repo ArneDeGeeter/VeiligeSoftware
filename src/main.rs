@@ -17,7 +17,7 @@ extern crate nix;
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use std::{fs::OpenOptions, os::unix::fs::OpenOptionsExt, thread};
+use std::{fs::OpenOptions, os::unix::fs::OpenOptionsExt, thread, cmp};
 use std::error::Error;
 use std::os::unix::io::AsRawFd;
 use std::path::Path;
@@ -30,6 +30,7 @@ use std::io::Cursor;
 use std::sync::mpsc::RecvTimeoutError::Timeout;
 use std::ptr::null;
 use time::Timespec;
+use std::panic::resume_unwind;
 
 #[derive(Copy, Clone)]
 pub struct Pixel {
@@ -314,7 +315,6 @@ impl GPIO {
 
         // Map the GPIO register file. See section 2.1 in the assignment for details
         let map = mmap_bcm_register((GPIO_REGISTER_OFFSET) as usize);
-        println!("{:?}", (GPIO_REGISTER_OFFSET) as usize);
 
         // Initialize the GPIO struct with default values
         let mut io: GPIO = GPIO {
@@ -522,7 +522,101 @@ pub fn read_ppm() -> Result<Image, std::io::Error> {
     Ok(image)
 }
 
-impl Image {}
+impl Image {
+    fn rescale(self: &Image) -> Image {
+        let mut rescaledImage = Image {
+            width: self.width * 16 / self.height,
+            height: 16,
+            pixels: vec![],
+        };
+        let pixels = (self.height / 16);
+        let extrapixels = (self.height % 16);
+        let mut count = 0;
+
+        let widthInterval = self.width / 16;
+
+        for y in 0..rescaledImage.width {
+            for x in 0..rescaledImage.height {
+                let extra = if count < extrapixels { 1 } else { 0 };
+                let mut r = 0;
+                let mut g = 0;
+                let mut b = 0;
+                let mut totalNumberOfPixels = 0;
+                for i in 0..widthInterval {
+                    for j in 0..(pixels + extra) {
+                        totalNumberOfPixels += 1;
+                        r += self.pixels[x * pixels + j + cmp::min(count, extrapixels)][y * widthInterval + i].r;
+                        g += self.pixels[x * pixels + j + cmp::min(count, extrapixels)][y * widthInterval + i].g;
+                        b += self.pixels[x * pixels + j + cmp::min(count, extrapixels)][y * widthInterval + i].b;
+                    }
+                }
+                r = r / totalNumberOfPixels;
+                g = g / totalNumberOfPixels;
+                b = b / totalNumberOfPixels;
+
+                rescaledImage.pixels[x][y] = Pixel {
+                    r: r,
+                    g: g,
+                    b: b,
+                };
+                count += 1;
+            }
+        }
+        show_image(&rescaledImage);
+        rescaledImage
+    }
+}
+fn show_image(image: &Image) {
+    let sdl = sdl2::init().unwrap();
+    let video_subsystem = sdl.video().unwrap();
+    let display_mode = video_subsystem.current_display_mode(0).unwrap();
+
+    let w = match display_mode.w as u32 > image.width as u32 {
+        true => image.width,
+        false => display_mode.w as u32
+    };
+    let h = match display_mode.h as u32 > image.height as u32 {
+        true => image.height,
+        false => display_mode.h as u32
+    };
+
+    let window = video_subsystem
+        .window("Image", w, h)
+        .build()
+        .unwrap();
+    let mut canvas = window
+        .into_canvas()
+        .present_vsync()
+        .build()
+        .unwrap();
+    let black = sdl2::pixels::Color::RGB(0, 0, 0);
+
+    let mut event_pump = sdl.event_pump().unwrap();
+
+    // render image
+    canvas.set_draw_color(black);
+    canvas.clear();
+
+    for r in 0..image.height {
+        for c in 0..image.width {
+            let pixel = &image.pixels[r as usize][c as usize];
+            canvas.set_draw_color(Color::RGB(pixel.r as u8, pixel.g as u8, pixel.b as u8));
+            canvas.fill_rect(Rect::new(c as i32, r as i32, 1, 1)).unwrap();
+        }
+    }
+
+    canvas.present();
+
+    'main: loop {
+        for event in event_pump.poll_iter() {
+            match event {
+                sdl2::event::Event::Quit { .. } => break 'main,
+                _ => {}
+            }
+        }
+        sleep(Duration::new(0, 250000000));
+    }
+}
 
 pub fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -542,10 +636,11 @@ pub fn main() {
         Ok(img) => img,
         Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
     };
-
-    println!("{}", image.height);
+    image.rescale();
+   /* println!("{}", image.height);
     println!("{}", image.pixels.len());
     println!("{}", unsafe { image.pixels.get_unchecked(0) }.len());//todo fix
+
     let mut GPIO = GPIO::new(500);
     let mut timer = Timer::new();
 
@@ -568,7 +663,7 @@ pub fn main() {
         println!("Received CTRL-C");
     } else {
         println!("Timeout reached");
-    }
+    }*/
 
 // TODO: You may want to reset the board here (i.e., disable all LEDs)
 }
