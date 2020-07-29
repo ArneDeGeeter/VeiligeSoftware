@@ -431,24 +431,22 @@ pub fn read_bmp() -> Result<Image, std::io::Error> { // {
     let img = bmp::open("dog.bmp").unwrap_or_else(|e| {
         panic!("Failed to open: {}", e);
     });
+    for (x, y) in img.coordinates() {
+        let px = img.get_pixel(x, y);
+        println!("X: {}, y: {} \n", x, y);
+        println!("R: {}, G: {}, B: {} \n", px.r, px.g, px.b);
+    };
     let mut image = Image {
         width: img.get_width() as usize,
         height: img.get_height() as usize,
         pixels: vec![],
     };
     image.pixels = vec![vec![Pixel { r: 0, g: 0, b: 0 }; image.width as usize]; image.height as usize];
-    for i in 0..image.height {
-        for j in 0..image.width {
-            image.pixels[i][j] = Pixel { r: img.get_pixel(i as u32, j as u32).r as u16, g: img.get_pixel(i as u32, j as u32).g as u16, b: img.get_pixel(i as u32, j as u32).b as u16 }
-        }
+    for (i, j) in img.coordinates() {
+        image.pixels[i][j] = Pixel { r: img.get_pixel(i as u32, j as u32).r as u16, g: img.get_pixel(i as u32, j as u32).g as u16, b: img.get_pixel(i as u32, j as u32).b as u16 }
     }
 
 
-    for (x, y) in img.coordinates() {
-        let px = img.get_pixel(x, y);
-        println!("X: {}, y: {} \n", x, y);
-        println!("R: {}, G: {}, B: {} \n", px.r, px.g, px.b);
-    };
     Result::Ok(image)
 }
 
