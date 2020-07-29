@@ -108,7 +108,7 @@ macro_rules! GPIO_BIT {
     };
 }
 macro_rules! currenttimemillis {
-    ()->SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_millis();
+    ()=>{SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_millis()};
 }
 
 // Use this bitmask for sanity checks
