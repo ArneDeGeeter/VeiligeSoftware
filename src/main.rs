@@ -529,6 +529,7 @@ impl Image {
             height: 16,
             pixels: vec![],
         };
+        rescaledImage.pixels = vec![vec![Pixel { r: 0, g: 0, b: 0 }; rescaledImage.width as usize]; rescaledImage.height as usize];
         let pixels = (self.height / 16);
         let extrapixels = (self.height % 16);
         let mut count = 0;
