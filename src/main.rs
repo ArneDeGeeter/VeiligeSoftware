@@ -580,25 +580,35 @@ impl Image {
             let mut extra_uses_width=0;
             for y in 0..rescaled_image.width {
                 count_height =0;
+                println!("{}",count_width);
 
                 let extra_width_single = if count_width < (extra_width) / 2 {
                     1
                 } else { if count_width > (rescaled_image.width - ((extra_width) / 2)) { 1 } else { 0 } };
 
                 for x in 0..rescaled_image.height {
+                    println!();
+                    println!("x{} y{}", x, y);
                     let extra_height_single = if count_height < extra_height { 1 } else { 0 };
                     let mut r: u64 = 0;
                     let mut g: u64 = 0;
                     let mut b: u64 = 0;
                     let mut total_number_of_pixels = 0;
+                    println!("{}ws", extra_width_single);
+
                     for i in 0..(width_interval + extra_width_single) {
                         for j in 0..(pixels + extra_height_single) {
                             total_number_of_pixels += 1;
+                            println!("{} {} {}",y * widthInterval, i, cmp::min(extra_uses_width as usize, extra_width as usize));
+
                             r += self.pixels[x * pixels + j + cmp::min(count_height, extra_height)][y * width_interval + i+cmp::min(extra_uses_width as usize, extra_width as usize)].r as u64;
                             g += self.pixels[x * pixels + j + cmp::min(count_height, extra_height)][y * width_interval + i+cmp::min(extra_uses_width as usize, extra_width as usize)].g as u64;
                             b += self.pixels[x * pixels + j + cmp::min(count_height, extra_height)][y * width_interval + i+cmp::min(extra_uses_width as usize, extra_width as usize)].b as u64;
                         }
                     }
+
+                    println!("{}extrawidthsingle",extra_width_single);
+
                     r = r / total_number_of_pixels;
                     g = g / total_number_of_pixels;
                     b = b / total_number_of_pixels;
