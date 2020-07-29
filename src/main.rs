@@ -604,7 +604,17 @@ impl Image {
             }
 
             rescaledImage
-        } else { &self }
+        } else {
+            //Don't judge
+            let mut img = Image { width: self.width, height: self.height, pixels: vec![] };
+            img.pixels = vec![vec![Pixel { r: 0, g: 0, b: 0 }; self.width as usize]; self.height as usize];
+            for y in 0usize..img.width as usize {
+                for x in 0usize..img.height as usize {
+                    img.pixels[x][y] = Pixel { r: self.pixels[x][y].r, g: self.pixels[x][y].g, b: self.pixels[x][y].b };
+                }
+            }
+            img
+        }
     }
 }
 
