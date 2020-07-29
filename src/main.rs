@@ -107,6 +107,9 @@ macro_rules! GPIO_BIT {
         1 << $bit
     };
 }
+macro_rules! currenttimemillis {
+    ()->SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_millis();
+}
 
 // Use this bitmask for sanity checks
 const VALID_BITS: u64 = GPIO_BIT!(PIN_OE) | GPIO_BIT!(PIN_CLK) | GPIO_BIT!(PIN_LAT) |
@@ -242,9 +245,9 @@ impl GPIO {
     }
     fn showImage(self: &mut GPIO, image: &Image) {
         for i in 0..image.width {
-            let mut lasttime = SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_millis();
-            while SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_millis() < (lasttime +333) {
-                lasttime = SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_millis();
+            let mut lasttime = currenttimemillis!();
+            while currenttimemillis!() < (lasttime + 1) {
+                currenttimemillis!();
 
                 for x in 0usize..8 {
                     let rowMask = match x {
