@@ -241,7 +241,7 @@ impl GPIO {
         self.activatePins(&mut ((GPIO_BIT!(PIN_OE)) as u32));
     }
     fn showImage(self: &mut GPIO, image: &Image) {
-        for i in image.width {
+        for i in 0..image.width {
             for x in 0usize..8 {
                 let rowMask = match x {
                     1 => GPIO_BIT!(PIN_A),
