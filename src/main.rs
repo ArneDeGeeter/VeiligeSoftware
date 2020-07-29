@@ -241,7 +241,7 @@ impl GPIO {
         self.activatePins(&mut ((GPIO_BIT!(PIN_OE)) as u32));
     }
     fn showImage(self: &mut GPIO, image: &Image) {
-        loop {
+        for i in image.width {
             for x in 0usize..8 {
                 let rowMask = match x {
                     1 => GPIO_BIT!(PIN_A),
@@ -253,17 +253,19 @@ impl GPIO {
                     7 => GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_B) | GPIO_BIT!(PIN_C),
                     _ => 0,
                 };
-                self.set_bits(rowMask as u32, image, x)
+                self.set_bits(rowMask as u32, image, x, i)
             }
         }
     }
-    fn set_bits(self: &mut GPIO, rowMask: u32, image: &Image, rowNumber: usize) {
+
+
+    fn set_bits(self: &mut GPIO, rowMask: u32, image: &Image, rowNumber: usize, start: usize) {
         // self.clearAllPins();
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
-        for c in 0usize..32 {
+        for c in (0+start):usize..(32+start) {
             self.clearAllPins();
-            let rgbmask1: u32 = (if image.pixels[rowNumber][c].r >= 128 { GPIO_BIT!({PIN_R1}) } else { 0 } | if image.pixels[rowNumber][c].g >= 128 { GPIO_BIT!({PIN_G1}) } else { 0 } | if image.pixels[rowNumber][c].b >= 128 { GPIO_BIT!({PIN_B1}) } else { 0 }) as u32;
-            let rgbmask2: u32 = (if image.pixels[rowNumber + 8][c].r >= 128 { GPIO_BIT!({PIN_R2}) } else { 0 } | if image.pixels[rowNumber + 8][c].g >= 128 { GPIO_BIT!({PIN_G2}) } else { 0 } | if image.pixels[rowNumber + 8][c].b >= 128 { GPIO_BIT!({PIN_B2}) } else { 0 }) as u32;
+            let rgbmask1: u32 = (if image.pixels[rowNumber][c%image.width].r >= 128 { GPIO_BIT!({PIN_R1}) } else { 0 } | if image.pixels[rowNumber][c%image.width].g >= 128 { GPIO_BIT!({PIN_G1}) } else { 0 } | if image.pixels[rowNumber][c%image.width].b >= 128 { GPIO_BIT!({PIN_B1}) } else { 0 }) as u32;
+            let rgbmask2: u32 = (if image.pixels[rowNumber + 8][c%image.width].r >= 128 { GPIO_BIT!({PIN_R2}) } else { 0 } | if image.pixels[rowNumber + 8][c%image.width].g >= 128 { GPIO_BIT!({PIN_G2}) } else { 0 } | if image.pixels[rowNumber + 8][c%image.width].b >= 128 { GPIO_BIT!({PIN_B2}) } else { 0 }) as u32;
             let rgbmask: u32 = rgbmask1 | rgbmask2;
             self.activatePins(&rgbmask);
 
@@ -607,8 +609,8 @@ pub fn main() {
     let mut timer = Timer::new();
 
 
-    // This code sets up a CTRL-C handler that writes "true" to the
-    // interrupt_received bool.
+// This code sets up a CTRL-C handler that writes "true" to the
+// interrupt_received bool.
     let int_recv = interrupt_received.clone();
     ctrlc::set_handler(move || {
         int_recv.store(true, Ordering::SeqCst);
@@ -617,7 +619,7 @@ pub fn main() {
     while interrupt_received.load(Ordering::SeqCst) == false {
         GPIO.showImage(&rescaledImage);
 
-        // TODO: Implement your rendering loop here
+// TODO: Implement your rendering loop here
     }
     println!("Exiting.");
     if interrupt_received.load(Ordering::SeqCst) == true {
