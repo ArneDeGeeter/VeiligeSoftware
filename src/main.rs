@@ -245,6 +245,9 @@ impl GPIO {
     fn set_bits(self: &mut GPIO, row: u32, lineVec: Vec<Pixel>) {
         // self.clearAllPins();
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
+
+        self.clearPins(&mut ((GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C) | GPIO_BIT!(PIN_B) | GPIO_BIT!(PIN_D) | GPIO_BIT!(PIN_E)) as u32));
+        self.activatePins((&mut ((GPIO_BIT!(PIN_B)) as u32)));
         for c in 0..32 {
             if (c % 2 == 1) {
                 self.clearAllPinsAndActivate(&mut ((GPIO_BIT!(PIN_R1)) as u32));
@@ -260,11 +263,8 @@ impl GPIO {
 
 
         self.clearPins(&mut ((GPIO_BIT!(PIN_R1) | GPIO_BIT!(PIN_R2) | GPIO_BIT!(PIN_B1) | GPIO_BIT!(PIN_B2) | GPIO_BIT!(PIN_G1) | GPIO_BIT!(PIN_G2)) as u32));
-        self.clearPins(&mut ((GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C) | GPIO_BIT!(PIN_B) | GPIO_BIT!(PIN_D) | GPIO_BIT!(PIN_E)) as u32));
         println!("{:#034b},read oe1", unsafe { *self.gpio_read_bits_ });
 
-        self.activatePins((&mut ((GPIO_BIT!(PIN_B)) as u32)));
-        thread::sleep(Duration::new(0, 1000000 * 500));
 
         println!("{:#034b},read oe2", unsafe { *self.gpio_read_bits_ });
 
@@ -274,7 +274,6 @@ impl GPIO {
 
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
         // println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
-        thread::sleep(Duration::new(0, 1000000 * 10));
         self.activatePins(&mut (GPIO_BIT!(PIN_OE) as u32));
         //     println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
 
@@ -478,7 +477,7 @@ fn decode_ppm_image(cursor: &mut Cursor<Vec<u8>>) -> Result<Image, std::io::Erro
                     pixel_array[pixelcounter] = c[0];
                     pixelcounter = (pixelcounter + 1) % 3;
                     if pixelcounter == 0 {
-                        image.pixels[((image.height * image.width - 1 - count) / image.width) as usize][((image.height * image.width - 1 - count) % image.width) as usize] = Pixel {
+                        image.pixels[(count / image.width) as usize][(count % image.width) as usize] = Pixel {
                             r: pixel_array[0] as u16,
                             g: pixel_array[1] as u16,
                             b: pixel_array[2] as u16,
@@ -564,35 +563,6 @@ impl Image {
                 count += 1;
             }
         }
-        for y in 0..rescaledImage.width {
-            for x in 0..rescaledImage.height {
-                print!("{} ", { rescaledImage.pixels[x][y].r })
-            }
-            println!();
-        }
-        println!();
-        println!();
-        println!();
-
-        for y in 0..rescaledImage.width {
-            for x in 0..rescaledImage.height {
-                print!("{} ", { rescaledImage.pixels[x][y].g })
-            }
-            println!();
-        }
-        println!();
-        println!();
-        println!();
-
-        for y in 0..rescaledImage.width {
-            for x in 0..rescaledImage.height {
-                print!("{} ", { rescaledImage.pixels[x][y].b })
-            }
-            println!();
-        }
-        println!();
-        println!();
-        println!();
 
         rescaledImage
     }
@@ -617,7 +587,7 @@ pub fn main() {
         Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
     };
     image.rescale();
-    /* println!("{}", image.height);
+     println!("{}", image.height);
      println!("{}", image.pixels.len());
      println!("{}", unsafe { image.pixels.get_unchecked(0) }.len());//todo fix
 
@@ -643,7 +613,7 @@ pub fn main() {
          println!("Received CTRL-C");
      } else {
          println!("Timeout reached");
-     }*/
+     }
 
 // TODO: You may want to reset the board here (i.e., disable all LEDs)
 }
