@@ -243,7 +243,7 @@ impl GPIO {
     fn showImage(self: &mut GPIO, image: &Image) {
         for i in 0..image.width {
             let mut lasttime = 0;
-            while SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_millis() > (lasttime + 333) {
+            while SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_millis() > (lasttime + 333333) {
                 lasttime = SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_millis();
 
                 for x in 0usize..8 {
