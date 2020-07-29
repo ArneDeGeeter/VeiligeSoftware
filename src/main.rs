@@ -257,7 +257,7 @@ impl GPIO {
             }
         }
     }
-    fn set_bits(self: &mut GPIO, rowMask: u32, image: &Image, rowNumber: i32) {
+    fn set_bits(self: &mut GPIO, rowMask: u32, image: &Image, rowNumber: usize) {
         // self.clearAllPins();
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
         for c in 0usize..32 {
