@@ -629,7 +629,7 @@ pub fn main() {
     }
 
 // TODO: Read the PPM file here. You can find its name in args[1]
-    let image = read_bmp();
+    let image = read_bmp().unwrap();
     /* let image = match read_ppm() {
          Ok(img) => img,
          Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
