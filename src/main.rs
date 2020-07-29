@@ -438,6 +438,7 @@ pub fn read_bmp() -> Result<Image, std::io::Error> { // {
     };
     image.pixels = vec![vec![Pixel { r: 0, g: 0, b: 0 }; image.width as usize]; image.height as usize];
     for (i, j) in img.coordinates() {
+        println!("{} {}",i,j);
         image.pixels[i as usize][j as usize] = Pixel { r: img.get_pixel(i as u32, j as u32).r as u16, g: img.get_pixel(i as u32, j as u32).g as u16, b: img.get_pixel(i as u32, j as u32).b as u16 }
     }
 
