@@ -244,7 +244,7 @@ impl GPIO {
         for i in 0..image.width {
             let mut lasttime = 0;
             while SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_millis() > (lasttime + 333) {
-                lasttime = SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_millis().as_millis();
+                lasttime = SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_millis();
 
                 for x in 0usize..8 {
                     let rowMask = match x {
