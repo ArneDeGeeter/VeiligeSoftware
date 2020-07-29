@@ -246,11 +246,11 @@ impl GPIO {
     fn showImage(self: &mut GPIO, image: &Image) {
         for i in 0..image.width {
             let mut lasttime = currenttimemicros!();
-            let mut timerinterval = 10;
+            let mut timerinterval = 1;
             let mut framenumber = 0;
             while currenttimemicros!() < (lasttime + 256000) {
                 framenumber = framenumber % 8;
-                timerinterval = (10 * (2 ^ framenumber)) as u128;
+                timerinterval = (1 * (2 ^ framenumber)) as u128;
 
                 let mut lastframetime = currenttimemicros!();
                 while currenttimemicros!() < (lastframetime + timerinterval) {
@@ -427,16 +427,29 @@ impl Timer {
 impl Frame {}
 
 //First implementation of BMP parser
-pub fn read_bmp() { //-> Result<Image, std::io::Error> {
+pub fn read_bmp() -> Result<Image, std::io::Error> { // {
     let img = bmp::open("dog.bmp").unwrap_or_else(|e| {
         panic!("Failed to open: {}", e);
     });
+    let mut image = Image {
+        width: img.get_width() as usize,
+        height: img.get_height() as usize,
+        pixels: vec![],
+    };
+    image.pixels = vec![vec![Pixel { r: 0, g: 0, b: 0 }; image.width as usize]; image.height as usize];
+    for i in 0..image.height {
+        for j in 0..image.width {
+            image.pixels[i][j] = Pixel { r: img.get_pixel(i as u32, j as u32).r as u16, g: img.get_pixel(i as u32, j as u32).g as u16, b: img.get_pixel(i as u32, j as u32).b as u16 }
+        }
+    }
+
 
     for (x, y) in img.coordinates() {
         let px = img.get_pixel(x, y);
         println!("X: {}, y: {} \n", x, y);
         println!("R: {}, G: {}, B: {} \n", px.r, px.g, px.b);
     };
+    Result(image)
 }
 
 
@@ -616,10 +629,11 @@ pub fn main() {
     }
 
 // TODO: Read the PPM file here. You can find its name in args[1]
-    let image = match read_ppm() {
-        Ok(img) => img,
-        Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
-    };
+    let image = read_bmp();
+    /* let image = match read_ppm() {
+         Ok(img) => img,
+         Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
+     };*/
     let rescaledImage = image.rescale();
     println!("{}", image.height);
     println!("{}", image.pixels.len());
