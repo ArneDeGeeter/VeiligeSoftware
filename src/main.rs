@@ -246,11 +246,11 @@ impl GPIO {
     fn showImage(self: &mut GPIO, image: &Image) {
         for i in 0..image.width {
             let mut lasttime = currenttimemicros!();
-            let mut timerinterval = 1000;
+            let mut timerinterval = 10;
             let mut framenumber = 0;
             while currenttimemicros!() < (lasttime + 256000) {
                 framenumber = framenumber % 8;
-                timerinterval = (1000 * (2 ^ framenumber)) as u128;
+                timerinterval = (10 * (2 ^ framenumber)) as u128;
 
                 let mut lastframetime = currenttimemicros!();
                 while currenttimemicros!() < (lastframetime + timerinterval) {
