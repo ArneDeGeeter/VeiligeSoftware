@@ -449,7 +449,7 @@ pub fn read_bmp() -> Result<Image, std::io::Error> { // {
         println!("X: {}, y: {} \n", x, y);
         println!("R: {}, G: {}, B: {} \n", px.r, px.g, px.b);
     };
-    Result(image)
+    Result::Ok(image)
 }
 
 
