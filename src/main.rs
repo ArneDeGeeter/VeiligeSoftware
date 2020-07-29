@@ -23,7 +23,7 @@ use std::os::unix::io::AsRawFd;
 use std::path::Path;
 use std::io::prelude::*;
 use std::fs::File;
-use std::time::Duration;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use shuteye::sleep;
 use mmap::{MemoryMap, MapOption};
 use std::io::Cursor;
@@ -242,20 +242,24 @@ impl GPIO {
     }
     fn showImage(self: &mut GPIO, image: &Image) {
         for i in 0..image.width {
-            for x in 0usize..8 {
-                let rowMask = match x {
-                    1 => GPIO_BIT!(PIN_A),
-                    2 => GPIO_BIT!(PIN_B),
-                    3 => GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_B),
-                    4 => GPIO_BIT!(PIN_C),
-                    5 => GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C),
-                    6 => GPIO_BIT!(PIN_B) | GPIO_BIT!(PIN_C),
-                    7 => GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_B) | GPIO_BIT!(PIN_C),
-                    _ => 0,
-                };
-                self.set_bits(rowMask as u32, image, x, i)
+            let mut lasttime = 0;
+            while SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_millis() > (lasttime + 333) {
+                lasttime = SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_millis().as_millis();
+
+                for x in 0usize..8 {
+                    let rowMask = match x {
+                        1 => GPIO_BIT!(PIN_A),
+                        2 => GPIO_BIT!(PIN_B),
+                        3 => GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_B),
+                        4 => GPIO_BIT!(PIN_C),
+                        5 => GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C),
+                        6 => GPIO_BIT!(PIN_B) | GPIO_BIT!(PIN_C),
+                        7 => GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_B) | GPIO_BIT!(PIN_C),
+                        _ => 0,
+                    };
+                    self.set_bits(rowMask as u32, image, x, i)
+                }
             }
-            thread::sleep(Duration::new(0, 1000000 * 1000));
         }
     }
 
@@ -286,9 +290,10 @@ impl GPIO {
 
         self.clearPins(&mut (GPIO_BIT!(PIN_LAT) as u32));
 
-        self.activatePins(&mut (GPIO_BIT!(PIN_OE) as u32));
 
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
+        self.activatePins(&mut (GPIO_BIT!(PIN_OE) as u32));
+
         // println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
         // thread::sleep(Duration::new(0, 1000000 * 10));
         //     println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
