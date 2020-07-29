@@ -534,7 +534,8 @@ impl Image {
         let extrapixels = (self.height % 16);
         let mut count = 0;
 
-        let widthInterval = self.width / 16;
+        let widthInterval: usize = ((self.width / 16) as isize) as usize;
+        println!("{}widthinterval", widthInterval);
 
         for y in 0..rescaledImage.width {
             for x in 0..rescaledImage.height {
