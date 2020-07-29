@@ -242,7 +242,7 @@ impl GPIO {
     }
     fn showImage(self: &mut GPIO, image: &Image) {
         while interrupt_received.load(Ordering::SeqCst) == false {
-            for x in 0..8 {
+            for x in 0usize..8 {
                 let rowMask = match x {
                     1 => GPIO_BIT!(A),
                     2 => GPIO_BIT!(B),
@@ -260,7 +260,7 @@ impl GPIO {
     fn set_bits(self: &mut GPIO, rowMask: u32, image: &Image, rowNumber: i32) {
         // self.clearAllPins();
         self.clearPins(&mut (GPIO_BIT!(PIN_OE) as u32));
-        for c in 0..32 {
+        for c in 0usize..32 {
             self.clearAllPins();
             let rgbmask1: u32 = (if image.pixels[rowNumber][c].r >= 128 { GPIO_BIT!({PIN_R1}) } else { 0 } | if image.pixels[rowNumber][c].g >= 128 { GPIO_BIT!({PIN_G1}) } else { 0 } | if image.pixels[rowNumber][c].b >= 128 { GPIO_BIT!({PIN_B1}) } else { 0 }) as u32;
             let rgbmask2: u32 = (if image.pixels[rowNumber + 8][c].r >= 128 { GPIO_BIT!({PIN_R2}) } else { 0 } | if image.pixels[rowNumber + 8][c].g >= 128 { GPIO_BIT!({PIN_G2}) } else { 0 } | if image.pixels[rowNumber + 8][c].b >= 128 { GPIO_BIT!({PIN_B2}) } else { 0 }) as u32;
