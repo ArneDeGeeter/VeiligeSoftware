@@ -248,7 +248,7 @@ impl GPIO {
             let mut lasttime = currenttimemicros!();
             let mut timerinterval = 1000;
             let mut framenumber = 0;
-            while currenttimemicros!() < (lasttime + 128000) {
+            while currenttimemicros!() < (lasttime + 256000) {
                 framenumber = framenumber % 8;
                 timerinterval = (1000 * (2 ^ framenumber)) as u128;
 
