@@ -31,6 +31,7 @@ use std::sync::mpsc::RecvTimeoutError::Timeout;
 use std::ptr::null;
 use time::Timespec;
 use std::panic::resume_unwind;
+use std::ffi::OsStr;
 
 #[derive(Copy, Clone)]
 pub struct Pixel {
@@ -426,7 +427,9 @@ impl Frame {}
 
 //First implementation of BMP parser
 pub fn read_bmp() -> Result<Image, std::io::Error> { // {
-    let img = bmp::open("android-5.bmp").unwrap_or_else(|e| {
+    let args: Vec<String> = std::env::args().collect();
+
+    let img = bmp::open(&args[1]).unwrap_or_else(|e| {
         panic!("Failed to open: {}", e);
     });
     let mut image = Image {
@@ -633,6 +636,12 @@ impl Image {
     }
 }
 
+fn get_extension_from_filename(filename: &str) -> Option<&str> {
+    Path::new(filename)
+        .extension()
+        .and_then(OsStr::to_str)
+}
+
 pub fn main() {
     let args: Vec<String> = std::env::args().collect();
     let interrupt_received = Arc::new(AtomicBool::new(false));
@@ -648,7 +657,14 @@ pub fn main() {
 
 // TODO: Read the PPM file here. You can find its name in args[1]
 
-    let image = read_bmp().unwrap();
+    let args: Vec<String> = std::env::args().collect();
+    let image = if get_extension_from_filename(&args[1]) == Some("bpm") { read_bmp().unwrap() } else if get_extension_from_filename(&args[1]) == Some("ppm") {
+        match read_ppm() {
+            Ok(img) => img,
+            Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
+        }
+    }else { panic!("wrong file extention") };
+    // let image = read_bmp().unwrap();
     // let image = match read_ppm() {
     //     Ok(img) => img,
     //     Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
