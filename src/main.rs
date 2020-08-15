@@ -746,6 +746,13 @@ pub fn main() {
 
 // TODO: Implement your rendering loop here
         }
+        println!("Exiting.");
+        if interrupt_received.load(Ordering::SeqCst) == true {
+            GPIO.shutdown();
+            println!("Received CTRL-C");
+        } else {
+            println!("Timeout reached");
+        }
     } else {
         let image = if get_extension_from_filename(&args[1]) == Some("bmp") { read_bmp().unwrap() } else if get_extension_from_filename(&args[1]) == Some("ppm") {
             match read_ppm() {
@@ -776,14 +783,15 @@ pub fn main() {
 
 // TODO: Implement your rendering loop here
         }
+        println!("Exiting.");
+        if interrupt_received.load(Ordering::SeqCst) == true {
+            GPIO.shutdown();
+            println!("Received CTRL-C");
+        } else {
+            println!("Timeout reached");
+        }
     }
-    println!("Exiting.");
-    if interrupt_received.load(Ordering::SeqCst) == true {
-        GPIO.shutdown();
-        println!("Received CTRL-C");
-    } else {
-        println!("Timeout reached");
-    }
+
 
 // TODO: You may want to reset the board here (i.e., disable all LEDs)
 }
