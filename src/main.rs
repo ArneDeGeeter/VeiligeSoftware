@@ -283,11 +283,11 @@ impl GPIO {
     fn show_gif(self: &mut GPIO, gif: &Gif) {
         for img in 0..gif.images.len() {
             let mut lasttime = current_time_micros!();
-            let mut timerinterval = 1;
+            let mut timerinterval = 4;
             let mut framenumber = 0;
             while current_time_micros!() < (lasttime + gif.delay as u128) {
                 framenumber = framenumber % 8;
-                timerinterval = (1 * (2 ^ framenumber)) as u128;
+                timerinterval = (4 * (2 ^ framenumber)) as u128;
 
                 let mut lastframetime = current_time_micros!();
                 while current_time_micros!() < (lastframetime + timerinterval) {
