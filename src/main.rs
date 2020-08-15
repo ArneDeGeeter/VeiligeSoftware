@@ -281,7 +281,7 @@ impl GPIO {
         }
     }
     fn show_gif(self: &mut GPIO, gif: &Gif) {
-        for img in gif.images {
+        for img in 0..gif.images.len() {
             let mut lasttime = current_time_micros!();
             let mut timerinterval = 1;
             let mut framenumber = 0;
@@ -302,7 +302,7 @@ impl GPIO {
                             7 => GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_B) | GPIO_BIT!(PIN_C),
                             _ => 0,
                         };
-                        self.set_bits(rowMask as u32, &img, x, 0, framenumber)
+                        self.set_bits(rowMask as u32, &gif.images[img], x, 0, framenumber)
                     }
                 }
                 framenumber += 1;
