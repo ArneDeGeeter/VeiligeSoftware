@@ -658,7 +658,7 @@ pub fn main() {
 // TODO: Read the PPM file here. You can find its name in args[1]
 
     let args: Vec<String> = std::env::args().collect();
-    let image = if get_extension_from_filename(&args[1]) == Some("bpm") { read_bmp().unwrap() } else if get_extension_from_filename(&args[1]) == Some("ppm") {
+    let image = if get_extension_from_filename(&args[1]) == Some("bmp") { read_bmp().unwrap() } else if get_extension_from_filename(&args[1]) == Some("ppm") {
         match read_ppm() {
             Ok(img) => img,
             Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
