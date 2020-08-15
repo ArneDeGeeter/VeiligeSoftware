@@ -562,7 +562,9 @@ pub fn read_gif() -> Result<Gif, std::io::Error> {
     let mut counter = 0;
     let mut gif = Gif { delay: 0, images: vec![] };
     while let Some(frame) = decoder.read_next_frame().unwrap() {
-        gif.delay = 10000*frame.delay as usize;
+        println!("{}", counter);
+        counter = counter + 1;
+        gif.delay = 10000 * frame.delay as usize;
         let cow = &frame.buffer;
 
 // for x in cow.iter() {
@@ -573,7 +575,6 @@ pub fn read_gif() -> Result<Gif, std::io::Error> {
         };
         println!("{},{}", frame.width, cow.iter().count());
         image.pixels = vec![vec![Pixel { r: 0, g: 0, b: 0 }; image.width as usize]; image.height as usize];
-        counter = counter + 1;
         for h in 0..(frame.height as usize) {
             for w in 0..(frame.width as usize) {
                 image.pixels[h][w] = Pixel {
