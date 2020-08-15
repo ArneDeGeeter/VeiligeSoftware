@@ -78,11 +78,6 @@ pub struct Frame {
     pixels: Vec<Vec<Pixel>>,
 }
 
-// Use this struct to implement high-precision nanosleeps
-struct Timer {
-    _timemap: Option<MemoryMap>,
-    timereg: *mut u32, // a raw pointer to the 1Mhz timer register (see section 2.5 in the assignment)
-}
 
 // ============================================================================
 // GPIO configuration parameters for the raspberry pi 3
@@ -213,11 +208,6 @@ impl GPIO {
         unsafe { std::ptr::write_volatile(register_ref, new_val) };
     }
 
-    fn init_outputs(self: &mut GPIO, mut outputs: u32) -> u32 {
-        self.configure_output_pin(PIN_OE);
-        0
-        // TODO: Implement this yourself. Note: this function expects          a bitmask as the @outputs argument
-    }
 
     fn activate_pins(self: &mut GPIO, bitmask: &u32) {
         let mut pin_output_set = self.gpio_set_bits_;
@@ -238,9 +228,6 @@ impl GPIO {
         self.clear_all_pins();
         let mut pin_output_set = self.gpio_set_bits_;
         unsafe { *pin_output_set = *bitmask }
-        // println!("{:#034b},set", unsafe { *pinOutputSet });
-        // println!("{:#034b},clear", unsafe { *pinOutputClear });
-        // println!("{:?},adr",self.gpio_read_bits_);
     }
     fn shutdown(self: &mut GPIO) {
         self.clear_all_pins();
@@ -251,6 +238,7 @@ impl GPIO {
 
         self.activate_pins(&mut ((GPIO_BIT!(PIN_OE)) as u32));
     }
+    
     fn show_image(self: &mut GPIO, image: &Image) {
         for i in 0..image.width {
             let mut lasttime = current_time_micros!();
@@ -280,6 +268,7 @@ impl GPIO {
             }
         }
     }
+
     fn show_gif(self: &mut GPIO, gif: &Gif) {
         for img in 0..gif.images.len() {
             let mut lasttime = current_time_micros!();
@@ -343,20 +332,6 @@ impl GPIO {
         self.activate_pins(&mut (GPIO_BIT!(PIN_OE) as u32));
     }
 
-    fn clear_bits(self: &mut GPIO, value: u32) {
-        // TODO: Implement this yourself. Remember to take the slowdown_ value into account!
-        // This function expects a bitmask as the @value argument
-    }
-
-    // Write all the bits of @value that also appear in @mask. Leave the rest untouched.
-// @value and @mask are bitmasks
-    fn write_masked_bits(
-        self: &mut GPIO,
-        value: u32,
-        mask: u32,
-    ) {
-        // TODO: Implement this yourself.
-    }
 
     fn new(slowdown: u32) -> GPIO {
 
@@ -384,18 +359,7 @@ impl GPIO {
                     io.gpio_set_bits_ = (io.gpio_port_.offset(7));
                     io.gpio_clr_bits_ = (io.gpio_port_.offset(10));
                     io.gpio_read_bits_ = (io.gpio_port_.offset(13));
-                    println!("{:?}", io.gpio_port_);
-                    println!("{:?}", io.gpio_set_bits_);
-                    println!("{:?}", io.gpio_clr_bits_);
-                    println!("{:?}", io.gpio_read_bits_);
-
-                    // TODO: Calculate the correct values of the other raw pointers here.
-                    // You should use the offset() method on the gpio_port_ pointer.
-                    // Keep in mind that Rust raw pointer arithmetic works exactly like
-                    // C pointer arithmetic. See the course slides for details
                 }
-
-                // TODO: Implement this yourself.
             }
             None => {}
         }
@@ -404,43 +368,12 @@ impl GPIO {
         io
     }
 
-    // Calculates the pins we must activate to push the address of the specified double_row
     fn get_row_bits(self: &GPIO, double_row: u8) -> u32 {
         0
-        // TODO: Implement this yourself.
     }
 }
 
-impl Timer {
-    // Reads from the 1Mhz timer register (see Section 2.5 in the assignment)
-    unsafe fn read(self: &Timer) -> u32 {
-        *self.timereg
-    }
 
-    fn new() -> Timer {
-        let mut var = (BCM2709_PERI_BASE + TIMER_REGISTER_OFFSET + 0x4) as *mut u32;
-        Timer { _timemap: mmap_bcm_register((GPIO_REGISTER_OFFSET + TIMER_REGISTER_OFFSET) as usize), timereg: var }
-// TODO: timemap?.
-    }
-
-    // High-precision sleep function (see section 2.5 in the assignment)
-// NOTE/WARNING: Since the raspberry pi's timer frequency is only 1Mhz,
-// you cannot reach full nanosecond precision here. You will have to think
-// about how you can approximate the desired precision. Obviously, there is
-// no perfect solution here.
-    fn nanosleep(self: &Timer, mut nanos: u32) {
-//todo sleep
-// libc::nanosleep(&Timespec::new(0, nanos as i32),&Timespec::new(0, nanos as i32));
-    }
-}
-
-// TODO: Implement your frame calculation/updating logic here.
-// The Frame should contain the pixels that are currently shown
-// on the LED board. In most cases, the Frame will have less pixels
-// than the input Image!
-impl Frame {}
-
-//First implementation of BMP parser
 pub fn read_bmp() -> Result<Image, std::io::Error> { // {
     let args: Vec<String> = std::env::args().collect();
 
@@ -461,12 +394,6 @@ pub fn read_bmp() -> Result<Image, std::io::Error> { // {
     Result::Ok(image)
 }
 
-
-// TODO: Add your PPM parser here
-// NOTE/WARNING: Please make sure that your implementation can handle comments in the PPM file
-// You do not need to add support for any formats other than P6
-// You may assume that the max_color value is always 255, but you should add sanity checks
-// to safely reject files with other max_color values
 
 fn decode_ppm_image(cursor: &mut Cursor<Vec<u8>>) -> Result<Image, std::io::Error> {
     let mut image = Image {
@@ -510,13 +437,6 @@ fn decode_ppm_image(cursor: &mut Cursor<Vec<u8>>) -> Result<Image, std::io::Erro
     let mut pixel_array: [u8; 3] = Default::default();
     comment = false;
 
-    /*   for _ in 0..image.height {
-           let mut row = Vec::new();
-           for _ in 0..image.width {
-               row.push(Pixel { r: cursor.read_u8()?, g: cursor.read_u8()?, b: cursor.read_u8()? })
-           }
-           image.pixels.push(row);
-       }*/
     loop {
         cursor.read(&mut c)?;
         match &c {
@@ -567,7 +487,6 @@ pub fn read_gif() -> Result<Gif, std::io::Error> {
         gif.delay = 10000 * frame.delay as usize;
         let cow = &frame.buffer;
 
-// for x in cow.iter() {
         let mut image = Image {
             width: frame.width as usize,
             height: frame.height as usize,
@@ -593,7 +512,6 @@ pub fn read_gif() -> Result<Gif, std::io::Error> {
             }
         }
         gif.images.push(image);
-// }
     }
     Ok(gif)
 }
@@ -611,11 +529,9 @@ pub fn read_ppm() -> Result<Image, std::io::Error> {
         Ok(file) => file
     };
 
-// read the full file into memory. panic on failure
     let mut raw_file = Vec::new();
     file.read_to_end(&mut raw_file).unwrap();
 
-// construct a cursor so we can seek in the raw buffer
     let mut cursor = Cursor::new(raw_file);
     let image = match decode_ppm_image(&mut cursor) {
         Ok(img) => img,
@@ -637,7 +553,6 @@ impl Image {
             let extra_height = (self.height % 16);
             let mut count_height = 0;
 
-//self.width/(resised.width)
             let width_interval = self.height / 16;
             let extra_width = (self.height % 16);
 
@@ -685,7 +600,6 @@ impl Image {
 
             rescaled_image
         } else {
-//Don't judge
             let mut img = Image { width: self.width, height: self.height, pixels: vec![] };
             img.pixels = vec![vec![Pixel { r: 0, g: 0, b: 0 }; self.width as usize]; self.height as usize];
             for y in 0usize..img.width as usize {
@@ -708,7 +622,6 @@ pub fn main() {
     let args: Vec<String> = std::env::args().collect();
     let interrupt_received = Arc::new(AtomicBool::new(false));
 
-// sanity checks
     if nix::unistd::Uid::current().is_root() == false {
         eprintln!("Must run as root to be able to access /dev/mem\nPrepend \'sudo\' to the command");
         std::process::exit(1);
@@ -717,7 +630,6 @@ pub fn main() {
         std::process::exit(1);
     }
 
-// TODO: Read the PPM file here. You can find its name in args[1]
 
     let args: Vec<String> = std::env::args().collect();
     if get_extension_from_filename(&args[1]) == Some("gif") {
@@ -734,17 +646,12 @@ pub fn main() {
         let mut timer = Timer::new();
 
 
-// This code sets up a CTRL-C handler that writes "true" to the
-// interrupt_received bool.
         let int_recv = interrupt_received.clone();
         ctrlc::set_handler(move || {
             int_recv.store(true, Ordering::SeqCst);
         }).unwrap();
-        GPIO.init_outputs(0);
         while interrupt_received.load(Ordering::SeqCst) == false {
             GPIO.show_gif(&gif);
-
-// TODO: Implement your rendering loop here
         }
         println!("Exiting.");
         if interrupt_received.load(Ordering::SeqCst) == true {
@@ -760,28 +667,18 @@ pub fn main() {
                 Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
             }
         } else { panic!("wrong file extention") };
-// let image = read_bmp().unwrap();
-// let image = match read_ppm() {
-//     Ok(img) => img,
-//     Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
-// };
         let rescaled_image = image.rescale();
 
         let mut GPIO = GPIO::new(500);
         let mut timer = Timer::new();
 
 
-// This code sets up a CTRL-C handler that writes "true" to the
-// interrupt_received bool.
         let int_recv = interrupt_received.clone();
         ctrlc::set_handler(move || {
             int_recv.store(true, Ordering::SeqCst);
         }).unwrap();
-        GPIO.init_outputs(0);
         while interrupt_received.load(Ordering::SeqCst) == false {
             GPIO.show_image(&rescaled_image);
-
-// TODO: Implement your rendering loop here
         }
         println!("Exiting.");
         if interrupt_received.load(Ordering::SeqCst) == true {
@@ -791,8 +688,5 @@ pub fn main() {
             println!("Timeout reached");
         }
     }
-
-
-// TODO: You may want to reset the board here (i.e., disable all LEDs)
 }
 
