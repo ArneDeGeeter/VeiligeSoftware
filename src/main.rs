@@ -576,7 +576,6 @@ pub fn read_gif() -> Result<Gif, std::io::Error> {
         image.pixels = vec![vec![Pixel { r: 0, g: 0, b: 0 }; image.width as usize]; image.height as usize];
         for h in 0..(frame.height as usize) {
             for w in 0..(frame.width as usize) {
-                cow.get(h * frame.width as usize + w)
                 image.pixels[h][w] = Pixel {
                     r: *match cow.get((h * frame.width as usize + w) * 4 + 0) {
                         Some(x) => x,
