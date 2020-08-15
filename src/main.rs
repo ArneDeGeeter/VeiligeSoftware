@@ -14,6 +14,7 @@ extern crate simple_error;
 extern crate shuteye;
 extern crate mmap;
 extern crate nix;
+extern crate gif;
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -22,7 +23,7 @@ use std::error::Error;
 use std::os::unix::io::AsRawFd;
 use std::path::Path;
 use std::io::prelude::*;
-use std::fs::File;
+use std::fs::{File, read};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use shuteye::sleep;
 use mmap::{MemoryMap, MapOption};
@@ -32,12 +33,18 @@ use std::ptr::null;
 use time::Timespec;
 use std::panic::resume_unwind;
 use std::ffi::OsStr;
+use gif::SetParameter;
 
 #[derive(Copy, Clone)]
 pub struct Pixel {
     r: u16,
     g: u16,
     b: u16,
+}
+
+pub struct Gif {
+    delay: usize,
+    images: Vec<Image>,
 }
 
 pub struct GPIO {
@@ -273,6 +280,35 @@ impl GPIO {
             }
         }
     }
+    fn show_gif(self: &mut GPIO, gif: &Gif) {
+        for img in gif.images {
+            let mut lasttime = current_time_micros!();
+            let mut timerinterval = 1;
+            let mut framenumber = 0;
+            while current_time_micros!() < (lasttime + gif.delay as u128) {
+                framenumber = framenumber % 8;
+                timerinterval = (1 * (2 ^ framenumber)) as u128;
+
+                let mut lastframetime = current_time_micros!();
+                while current_time_micros!() < (lastframetime + timerinterval) {
+                    for x in 0usize..8 {
+                        let rowMask = match x {
+                            1 => GPIO_BIT!(PIN_A),
+                            2 => GPIO_BIT!(PIN_B),
+                            3 => GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_B),
+                            4 => GPIO_BIT!(PIN_C),
+                            5 => GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_C),
+                            6 => GPIO_BIT!(PIN_B) | GPIO_BIT!(PIN_C),
+                            7 => GPIO_BIT!(PIN_A) | GPIO_BIT!(PIN_B) | GPIO_BIT!(PIN_C),
+                            _ => 0,
+                        };
+                        self.set_bits(rowMask as u32, &img, x, 0, framenumber)
+                    }
+                }
+                framenumber += 1;
+            }
+        }
+    }
 
 
     fn set_bits(self: &mut GPIO, rowMask: u32, image: &Image, rowNumber: usize, start: usize, framenumber: u16) {
@@ -305,27 +341,6 @@ impl GPIO {
 
         self.clear_pins(&mut (GPIO_BIT!(PIN_OE) as u32));
         self.activate_pins(&mut (GPIO_BIT!(PIN_OE) as u32));
-
-        // println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
-        // thread::sleep(Duration::new(0, 1000000 * 10));
-        //     println!("{:#034b},read oe", unsafe { *self.gpio_read_bits_ });
-
-        /*self.configure_output_pin(PIN_OE);
-        self.configure_output_pin(PIN_C);
-        self.configure_output_pin(PIN_R1);
-        self.configure_output_pin(PIN_R2);
-        self.configure_output_pin(PIN_B1);
-        self.configure_output_pin(PIN_B2);
-        self.configure_output_pin(PIN_G1);
-
-
-        self.configure_output_pin(PIN_LAT);
-        self.configure_output_pin(PIN_LAT);
-        self.configure_output_pin(PIN_CLK);
-        self.configure_output_pin(PIN_CLK);*/
-
-        // TODO: Implement this yourself. Remember to take the slowdown_ value into account!
-        // This function expects a bitmask as the @value argument
     }
 
     fn clear_bits(self: &mut GPIO, value: u32) {
@@ -536,6 +551,53 @@ fn decode_ppm_image(cursor: &mut Cursor<Vec<u8>>) -> Result<Image, std::io::Erro
     Ok(image)
 }
 
+pub fn read_gif() -> Result<Gif, std::io::Error> {
+    use std::fs::File;
+    use gif::SetParameter;
+    let args: Vec<String> = std::env::args().collect();
+
+    let mut decoder = gif::Decoder::new(File::open(&args[1]).unwrap());
+    decoder.set(gif::ColorOutput::RGBA);
+    let mut decoder = decoder.read_info().unwrap();
+    let mut counter = 0;
+    let mut gif = Gif { delay: 0, images: vec![] };
+    while let Some(frame) = decoder.read_next_frame().unwrap() {
+        gif.delay = frame.delay as usize;
+        let cow = &frame.buffer;
+
+// for x in cow.iter() {
+        let mut image = Image {
+            width: frame.width as usize,
+            height: frame.height as usize,
+            pixels: vec![],
+        };
+        println!("{},{}", frame.width, cow.iter().count());
+        image.pixels = vec![vec![Pixel { r: 0, g: 0, b: 0 }; image.width as usize]; image.height as usize];
+        counter = counter + 1;
+        for h in 0..(frame.height as usize) {
+            for w in 0..(frame.width as usize) {
+                image.pixels[h][w] = Pixel {
+                    r: *match cow.get((h * frame.width as usize + w) * 4 + 0) {
+                        Some(x) => x,
+                        None => &(0 as u8)
+                    } as u16,
+                    g: *match cow.get((h * frame.width as usize + w) * 4 + 1) {
+                        Some(x) => x,
+                        None => &(0 as u8)
+                    } as u16,
+                    b: *match cow.get((h * frame.width as usize + w) * 4 + 2) {
+                        Some(x) => x,
+                        None => &(0 as u8)
+                    } as u16,
+                };
+            }
+        }
+        gif.images.push(image);
+// }
+    }
+    Ok(gif)
+}
+
 pub fn read_ppm() -> Result<Image, std::io::Error> {
     let args: Vec<String> = std::env::args().collect();
 
@@ -623,7 +685,7 @@ impl Image {
 
             rescaled_image
         } else {
-            //Don't judge
+//Don't judge
             let mut img = Image { width: self.width, height: self.height, pixels: vec![] };
             img.pixels = vec![vec![Pixel { r: 0, g: 0, b: 0 }; self.width as usize]; self.height as usize];
             for y in 0usize..img.width as usize {
@@ -658,37 +720,62 @@ pub fn main() {
 // TODO: Read the PPM file here. You can find its name in args[1]
 
     let args: Vec<String> = std::env::args().collect();
-    let image = if get_extension_from_filename(&args[1]) == Some("bmp") { read_bmp().unwrap() } else if get_extension_from_filename(&args[1]) == Some("ppm") {
-        match read_ppm() {
+    if get_extension_from_filename(&args[1]) == Some("gif") {
+        let mut gif = match read_gif() {
             Ok(img) => img,
-            Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
+            Err(why) => panic!("Could not parse gif file - Desc: {}", why),
+        };
+        for x in 0..gif.images.len() {
+            gif.images[x] = gif.images[x].rescale();
         }
-    }else { panic!("wrong file extention") };
-    // let image = read_bmp().unwrap();
-    // let image = match read_ppm() {
-    //     Ok(img) => img,
-    //     Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
-    // };
-    let rescaled_image = image.rescale();
-    println!("{}", image.height);
-    println!("{}", image.pixels.len());
-    println!("{}", unsafe { image.pixels.get_unchecked(0) }.len());//todo fix
 
-    let mut GPIO = GPIO::new(500);
-    let mut timer = Timer::new();
+
+        let mut GPIO = GPIO::new(500);
+        let mut timer = Timer::new();
 
 
 // This code sets up a CTRL-C handler that writes "true" to the
 // interrupt_received bool.
-    let int_recv = interrupt_received.clone();
-    ctrlc::set_handler(move || {
-        int_recv.store(true, Ordering::SeqCst);
-    }).unwrap();
-    GPIO.init_outputs(0);
-    while interrupt_received.load(Ordering::SeqCst) == false {
-        GPIO.show_image(&rescaled_image);
+        let int_recv = interrupt_received.clone();
+        ctrlc::set_handler(move || {
+            int_recv.store(true, Ordering::SeqCst);
+        }).unwrap();
+        GPIO.init_outputs(0);
+        while interrupt_received.load(Ordering::SeqCst) == false {
+            GPIO.show_gif(&gif);
 
 // TODO: Implement your rendering loop here
+        }
+    } else {
+        let image = if get_extension_from_filename(&args[1]) == Some("bmp") { read_bmp().unwrap() } else if get_extension_from_filename(&args[1]) == Some("ppm") {
+            match read_ppm() {
+                Ok(img) => img,
+                Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
+            }
+        } else { panic!("wrong file extention") };
+// let image = read_bmp().unwrap();
+// let image = match read_ppm() {
+//     Ok(img) => img,
+//     Err(why) => panic!("Could not parse PPM file - Desc: {}", why),
+// };
+        let rescaled_image = image.rescale();
+
+        let mut GPIO = GPIO::new(500);
+        let mut timer = Timer::new();
+
+
+// This code sets up a CTRL-C handler that writes "true" to the
+// interrupt_received bool.
+        let int_recv = interrupt_received.clone();
+        ctrlc::set_handler(move || {
+            int_recv.store(true, Ordering::SeqCst);
+        }).unwrap();
+        GPIO.init_outputs(0);
+        while interrupt_received.load(Ordering::SeqCst) == false {
+            GPIO.show_image(&rescaled_image);
+
+// TODO: Implement your rendering loop here
+        }
     }
     println!("Exiting.");
     if interrupt_received.load(Ordering::SeqCst) == true {
