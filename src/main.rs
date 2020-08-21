@@ -238,7 +238,7 @@ impl GPIO {
 
         self.activate_pins(&mut ((GPIO_BIT!(PIN_OE)) as u32));
     }
-    
+
     fn show_image(self: &mut GPIO, image: &Image) {
         for i in 0..image.width {
             let mut lasttime = current_time_micros!();
@@ -643,7 +643,6 @@ pub fn main() {
 
 
         let mut GPIO = GPIO::new(500);
-        let mut timer = Timer::new();
 
 
         let int_recv = interrupt_received.clone();
@@ -670,7 +669,6 @@ pub fn main() {
         let rescaled_image = image.rescale();
 
         let mut GPIO = GPIO::new(500);
-        let mut timer = Timer::new();
 
 
         let int_recv = interrupt_received.clone();
